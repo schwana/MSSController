@@ -74,7 +74,7 @@ class GraphFrame(tk.Frame):
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(10)
         s.connect(('localhost',1090))
-        print (s.recv(1024))
+        print (s.recv(1024).decode("utf-8"))
 
         #Login
         s.send(b'login i,pw \r\n')
@@ -87,7 +87,7 @@ class GraphFrame(tk.Frame):
 
         #Set Initial Source Voltage
         s.send(b'SetSourceOutput IE,1300.0000\r\n')
-        time.sleep(10)
+        time.sleep(1)
         print (s.recv(1024))
         s.send(b'SetAcqPeriod 100\r\n')
         time.sleep(1)
@@ -95,7 +95,7 @@ class GraphFrame(tk.Frame):
 
         #Scan across peak
         SV=1300.0
-        TV=1450.0
+        TV=1310.0
         global spectrum
         iE_=[]
         L5_=[]
@@ -134,13 +134,94 @@ class GraphFrame(tk.Frame):
             returnString=s.recv(1024)
             time.sleep(.2)
 
+            #Get readbacks of voltages
+            sleepyTime=0.1
+            s.send(b'GSO IE\r\n')
+            time.sleep(sleepyTime)
+            rS_IE=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+
+            s.send(b'GSO YF\r\n')
+            time.sleep(sleepyTime)
+            rS_YF=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+
+
+            s.send(b'GSO YB\r\n')
+            time.sleep(sleepyTime)
+            rS_YB=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+          
+
+            s.send(b'GSO EE\r\n')
+            time.sleep(sleepyTime)
+            rS_EE=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+            
+
+            s.send(b'GSO IR\r\n')
+            time.sleep(sleepyTime)
+            rS_IR=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+   
+
+            s.send(b'GSO TV\r\n')
+            time.sleep(sleepyTime)
+            rS_TV=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+
+
+            s.send(b'GSO FC\r\n')
+            time.sleep(sleepyTime)
+            rS_FC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+  
+
+            s.send(b'GSO FV\r\n')
+            time.sleep(sleepyTime)
+            rS_FV=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+
+
+            s.send(b'GSO TC\r\n')
+            time.sleep(sleepyTime)
+            rS_TC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+             
+
+            s.send(b'GSO EC\r\n')
+            time.sleep(sleepyTime)
+            rS_EC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+
+
+            rS_String=(","+str(rS_IE) + ","+str(rS_YF)+ ","+str(rS_YB)+ "," +
+                        rS_EE+ "," +
+                        rS_IR+ "," +
+                        rS_TV+ "," +
+                        rS_FC+ "," +
+                        rS_FV+ "," +
+                        rS_TC+ "," +
+                        rS_EC+ ",")
+
+            print (rS_String)
             #Separate the string
             spec=(returnString.decode("utf-8"))
             rS=(str(SV)+","+spec)
             rS=rS[0:-5]
             spectrum=rS.split(',')
-            print (spectrum)
-            print (SV, "Ax", spectrum[13], "L2", spectrum[11], "L4", spectrum[9],)
+            #print (spectrum)
+            #print (SV, "Ax", spectrum[13], "L2", spectrum[11], "L4", spectrum[9],)
 
 
             iE_.append(float(spectrum[0]))
@@ -174,16 +255,16 @@ class GraphFrame(tk.Frame):
 
 
             
-            SV=SV+0.2
+            SV=SV+1
 
         s.send(b'SetSourceOutput IE,1100.0000\r\n')
         time.sleep(0.2)
         print (s.recv(1024))    
         s.close()
 
-        self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4)
+        self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_String)
 
-    def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4):
+    def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_String):
         print("Output Data to File")
 
         os.chdir("c:\\MSSData")
@@ -202,6 +283,11 @@ class GraphFrame(tk.Frame):
         FileName = 'Scan'+ScanNum+'.dat'
 
         #Read Inlet Line
+        rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read)')
+        foInitial = open(FileName,"a")
+        foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4"+rS_top)
+
+        foInitial.close()
 
 
         foRun = open(FileName,"a")
@@ -212,7 +298,7 @@ class GraphFrame(tk.Frame):
                           str(L4[x])+","+str(L3[x])+","+
                           str(L2[x])+","+str(L1[x])+","+
                           str(Ax[x])+","+str(H1[x])+","+
-                          str(H2[x])+","+str(H3[x])+","+str(H4[x]))
+                          str(H2[x])+","+str(H3[x])+","+str(H4[x])+rS_String)
             
             foRun.write(outputString+'\n')
 
