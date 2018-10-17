@@ -86,8 +86,8 @@ class GraphFrame(tk.Frame):
         print (s.recv(1024))
 
         #Set Initial Source Voltage
-        s.send(b'SetSourceOutput IE,1100.0000\r\n')
-        time.sleep(1)
+        s.send(b'SetSourceOutput IE,1300.0000\r\n')
+        time.sleep(10)
         print (s.recv(1024))
         s.send(b'SetAcqPeriod 100\r\n')
         time.sleep(1)
@@ -95,7 +95,7 @@ class GraphFrame(tk.Frame):
 
         #Scan across peak
         SV=1300.0
-        TV=1650.0
+        TV=1450.0
         global spectrum
         iE_=[]
         L5_=[]
@@ -174,7 +174,7 @@ class GraphFrame(tk.Frame):
 
 
             
-            SV=SV+10
+            SV=SV+0.2
 
         s.send(b'SetSourceOutput IE,1100.0000\r\n')
         time.sleep(0.2)
