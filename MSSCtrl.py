@@ -11,18 +11,9 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import numpy as np
 from tkinter import filedialog
 
-##from tkinter import * 
-##
-##import matplotlib.pyplot as plt
-##
-##import numpy as np
-##import tkinter as tk
-##root = tk.Tk()
-##import matplotlib
+
 matplotlib.use("TkAgg")
 
-##from matplotlib.backends.backend_tkagg import FigureCanvasTk, NavigationToolbar2Tk
-##from matplotlib.figure import Figure
 
 N=0
 root = tk.Tk()
@@ -69,6 +60,13 @@ class GraphFrame(tk.Frame):
         exit()
 
     def openFile(self):
+        if Controls.FS_checked.get():
+            print("Fast Scan")
+            FastScan=True
+        else:
+            print("Slow Scan")
+            FastScan=False            
+        
         #Connect to instrument
         print ("Connecting to mass spec")
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -78,25 +76,28 @@ class GraphFrame(tk.Frame):
 
         #Login
         s.send(b'login i,pw \r\n')
-        time.sleep(1)
-        print (s.recv(1024))
-        time.sleep(1)
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
         s.send(b'ver\r\n')
-        time.sleep(1)
-        print (s.recv(1024))
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
 
         #Set Initial Source Voltage
+        print ("Initialise Source Voltage")
         s.send(b'SetSourceOutput IE,1300.0000\r\n')
-        time.sleep(1)
-        print (s.recv(1024))
+        time.sleep(0.2)
+        Dummy=(s.recv(1024).decode("utf-8"))
         s.send(b'SetAcqPeriod 100\r\n')
-        time.sleep(1)
-        print ("SetAcqPeriod",s.recv(1024))
+        time.sleep(0.2)
+        Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
 
         #Scan across peak
         SV=1300.0
-        TV=1310.0
+        TV=1500.0
+        StepSize=1
         global spectrum
+        rS_=[]
         iE_=[]
         L5_=[]
         L4_=[]
@@ -120,89 +121,100 @@ class GraphFrame(tk.Frame):
         global H3
         global H4
         global N
- 
+        print ("Start Scan")
         while SV < TV:
             BStr=("SetSourceOutput IE,")
             CStr=(str(SV)+"\r\n")
             AStr=BStr+CStr
             s.send(str.encode(AStr))
-            time.sleep(.2)
+            time.sleep(.1)
             IEreturn=(s.recv(1024))
 
             s.send(b'StartAcq 1,XX\r\n')
             time.sleep(.2)
             returnString=s.recv(1024)
-            time.sleep(.2)
+            time.sleep(.1)
+            if FastScan:
+              rS_IE=("0,0")
+              rS_YF=("0,0")
+              rS_YB=("0,0")
+              rS_EE=("0,0")
+              rS_IR=("0,0")
+              rS_TV=("0,0")
+              rS_FC=("0,0")
+              rS_FV=("0,0")
+              rS_TC=("0,0")
+              rS_EC=("0,0")
+            else:
+                #Get readbacks of voltages
+                sleepyTime=0.1
+                s.send(b'GSO IE\r\n')
+                time.sleep(sleepyTime)
+                rS_IE=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
 
-            #Get readbacks of voltages
-            sleepyTime=0.1
-            s.send(b'GSO IE\r\n')
-            time.sleep(sleepyTime)
-            rS_IE=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
-
-            s.send(b'GSO YF\r\n')
-            time.sleep(sleepyTime)
-            rS_YF=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
-
-
-            s.send(b'GSO YB\r\n')
-            time.sleep(sleepyTime)
-            rS_YB=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
-          
-
-            s.send(b'GSO EE\r\n')
-            time.sleep(sleepyTime)
-            rS_EE=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
-            
-
-            s.send(b'GSO IR\r\n')
-            time.sleep(sleepyTime)
-            rS_IR=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
-   
-
-            s.send(b'GSO TV\r\n')
-            time.sleep(sleepyTime)
-            rS_TV=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+                s.send(b'GSO YF\r\n')
+                time.sleep(sleepyTime)
+                rS_YF=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
 
 
-            s.send(b'GSO FC\r\n')
-            time.sleep(sleepyTime)
-            rS_FC=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
-  
+                s.send(b'GSO YB\r\n')
+                time.sleep(sleepyTime)
+                rS_YB=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+              
 
-            s.send(b'GSO FV\r\n')
-            time.sleep(sleepyTime)
-            rS_FV=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+                s.send(b'GSO EE\r\n')
+                time.sleep(sleepyTime)
+                rS_EE=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+                
+
+                s.send(b'GSO IR\r\n')
+                time.sleep(sleepyTime)
+                rS_IR=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+       
+
+                s.send(b'GSO TV\r\n')
+                time.sleep(sleepyTime)
+                rS_TV=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
 
 
-            s.send(b'GSO TC\r\n')
-            time.sleep(sleepyTime)
-            rS_TC=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
-             
+                s.send(b'GSO FC\r\n')
+                time.sleep(sleepyTime)
+                rS_FC=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+      
 
-            s.send(b'GSO EC\r\n')
-            time.sleep(sleepyTime)
-            rS_EC=s.recv(1024).decode("utf-8")
-            time.sleep(sleepyTime)
-            rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+                s.send(b'GSO FV\r\n')
+                time.sleep(sleepyTime)
+                rS_FV=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+
+
+                s.send(b'GSO TC\r\n')
+                time.sleep(sleepyTime)
+                rS_TC=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+                 
+
+                s.send(b'GSO EC\r\n')
+                time.sleep(sleepyTime)
+                rS_EC=s.recv(1024).decode("utf-8")
+                time.sleep(sleepyTime)
+                rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
 
 
             rS_String=(","+str(rS_IE) + ","+str(rS_YF)+ ","+str(rS_YB)+ "," +
@@ -214,16 +226,13 @@ class GraphFrame(tk.Frame):
                         rS_TC+ "," +
                         rS_EC+ ",")
 
-            print (rS_String)
             #Separate the string
             spec=(returnString.decode("utf-8"))
             rS=(str(SV)+","+spec)
             rS=rS[0:-5]
             spectrum=rS.split(',')
-            #print (spectrum)
-            #print (SV, "Ax", spectrum[13], "L2", spectrum[11], "L4", spectrum[9],)
 
-
+            rS_.append(rS_String)
             iE_.append(float(spectrum[0]))
             L5_.append(float(spectrum[8]))
             L4_.append(float(spectrum[9]))
@@ -247,30 +256,31 @@ class GraphFrame(tk.Frame):
             H2=H2_
             H3=H3_
             H4=H4_
+            rS=rS_
 
             N=len(iE)
-            print (N,"N")
+           # print (N,"N")
             
             p=GraphFrame.plot()
 
 
             
-            SV=SV+1
+            SV=SV+StepSize
 
         s.send(b'SetSourceOutput IE,1100.0000\r\n')
         time.sleep(0.2)
         print (s.recv(1024))    
         s.close()
 
-        self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_String)
+        self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)
 
-    def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_String):
+    def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_):
         print("Output Data to File")
 
         os.chdir("c:\\MSSData")
 
         file_to_open = "ScanNum.txt"
-        print (file_to_open)
+        #print (file_to_open)
 
         #Get current helium run number
         fo = open(file_to_open, "r")
@@ -285,10 +295,9 @@ class GraphFrame(tk.Frame):
         #Read Inlet Line
         rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read)')
         foInitial = open(FileName,"a")
-        foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4"+rS_top)
+        foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4"+rS_top+"\n")
 
         foInitial.close()
-
 
         foRun = open(FileName,"a")
         #Collected data
@@ -298,7 +307,7 @@ class GraphFrame(tk.Frame):
                           str(L4[x])+","+str(L3[x])+","+
                           str(L2[x])+","+str(L1[x])+","+
                           str(Ax[x])+","+str(H1[x])+","+
-                          str(H2[x])+","+str(H3[x])+","+str(H4[x])+rS_String)
+                          str(H2[x])+","+str(H3[x])+","+str(H4[x])+rS_[x])
             
             foRun.write(outputString+'\n')
 
@@ -360,7 +369,7 @@ class GraphFrame(tk.Frame):
 
     def UpdatePlot():
         #Check to see if a scan is loaded. If iE is empty then dont call the plot
-        print ("N", N)
+ #       print ("N", N)
         if (N>0):
             p=GraphFrame.plot()
 ##        else:
@@ -374,7 +383,7 @@ class Controls(tk.Frame):
 
 
     def callback(*args):
-        print ("variable changed!")
+    #    print ("variable changed!")
         GraphFrame.UpdatePlot()
         
     L5_checked = tk.IntVar()
@@ -417,7 +426,9 @@ class Controls(tk.Frame):
     H4_checked.trace("w", callback)
     H4_checked.set(0)
 
-
+    FS_checked = tk.IntVar()
+    FS_checked.trace("w", callback)
+    FS_checked.set(0)
 
     c1=tk.Checkbutton(root, text="L5", onvalue=1, offvalue=0, variable=L5_checked)
     c2=tk.Checkbutton(root, text="L4", onvalue=1, offvalue=0, variable=L4_checked)
@@ -429,7 +440,7 @@ class Controls(tk.Frame):
     c8=tk.Checkbutton(root, text="H2", onvalue=1, offvalue=0, variable=H2_checked)
     c9=tk.Checkbutton(root, text="H3", onvalue=1, offvalue=0, variable=H3_checked)
     c10=tk.Checkbutton(root, text="H4", onvalue=1, offvalue=0, variable=H4_checked)
-
+    c11=tk.Checkbutton(root, text="Fast Scan", onvalue=1, offvalue=0, variable=FS_checked)
     
     c1.pack(side="left", fill="x")
     c2.pack(side="left", fill="x")
@@ -441,6 +452,7 @@ class Controls(tk.Frame):
     c8.pack(side="left", fill="x")
     c9.pack(side="left", fill="x")
     c10.pack(side="left", fill="x")
+    c11.pack(side="left", fill="x")
         
     
 
@@ -466,11 +478,11 @@ graph.pack(side="left", fill="x")
 controls.pack(side="bottom", fill="x")
 
 
-if controls.L5_checked.get():
-    print ("checked")
+##if controls.L5_checked.get():
+##    print ("checked")
 
 
-print (controls.L5_checked.get())     
+#print (controls.L5_checked.get())     
 
 #mainloop 
 root.mainloop()
