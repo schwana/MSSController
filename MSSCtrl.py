@@ -45,9 +45,9 @@ class GraphFrame(tk.Frame):
         self.master.config(menu=menu)
 
         file = tk.Menu(menu)
-        file.add_command(label="Open", command=self.openFile)
+        file.add_command(label="Run", command=self.openFile)
         file.add_command(label="Exit", command=self.exit)
-        menu.add_cascade(label="File", menu=file)
+        menu.add_cascade(label="Scan", menu=file)
 
         edit = tk.Menu(menu)
         edit.add_command(label="Undo")
@@ -93,9 +93,6 @@ class GraphFrame(tk.Frame):
         Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
 
         #Scan across peak
-        SV=1300.0
-        TV=1500.0
-        StepSize=1
         global spectrum
         rS_=[]
         iE_=[]
@@ -122,157 +119,192 @@ class GraphFrame(tk.Frame):
         global H4
         global N
         print ("Start Scan")
-        while SV < TV:
-            BStr=("SetSourceOutput IE,")
-            CStr=(str(SV)+"\r\n")
-            AStr=BStr+CStr
-            s.send(str.encode(AStr))
-            time.sleep(.1)
-            IEreturn=(s.recv(1024))
 
-            s.send(b'StartAcq 1,XX\r\n')
-            time.sleep(.2)
-            returnString=s.recv(1024)
-            time.sleep(.1)
-            if FastScan:
-              rS_IE=("0,0")
-              rS_YF=("0,0")
-              rS_YB=("0,0")
-              rS_EE=("0,0")
-              rS_IR=("0,0")
-              rS_TV=("0,0")
-              rS_FC=("0,0")
-              rS_FV=("0,0")
-              rS_TC=("0,0")
-              rS_EC=("0,0")
-            else:
-                #Get readbacks of voltages
-                sleepyTime=0.1
-                s.send(b'GSO IE\r\n')
-                time.sleep(sleepyTime)
-                rS_IE=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+        scans=0
+        total_scans=1
 
-                s.send(b'GSO YF\r\n')
-                time.sleep(sleepyTime)
-                rS_YF=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+        while scans < total_scans:
+            SV=1300.0
+            TV=1550.0
+            StepSize=0.1
+
+            print ("Scans Number",scans)
+            
+
+            while SV < TV:
+                print ("Scans Number",scans,"Voltage",SV)
+                BStr=("SetSourceOutput IE,")
+                CStr=(str(SV)+"\r\n")
+                AStr=BStr+CStr
+                s.send(str.encode(AStr))
+                time.sleep(.1)
+                IEreturn=(s.recv(1024))
+
+                s.send(b'StartAcq 1,XX\r\n')
+                time.sleep(1.0)
+                returnString=s.recv(1024)
+                time.sleep(.1)
+                if FastScan:
+                  rS_IE=("0,0")
+                  rS_YF=("0,0")
+                  rS_YB=("0,0")
+                  rS_EE=("0,0")
+                  rS_IR=("0,0")
+                  rS_TV=("0,0")
+                  rS_FC=("0,0")
+                  rS_FV=("0,0")
+                  rS_TC=("0,0")
+                  rS_EC=("0,0")
+                else:
+                    #Get readbacks of voltages
+                    sleepyTime=0.1
+                    s.send(b'GSO IE\r\n')
+                    time.sleep(sleepyTime)
+                    rS_IE=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+
+                    s.send(b'GSO YF\r\n')
+                    time.sleep(sleepyTime)
+                    rS_YF=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
 
 
-                s.send(b'GSO YB\r\n')
-                time.sleep(sleepyTime)
-                rS_YB=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
-              
+                    s.send(b'GSO YB\r\n')
+                    time.sleep(sleepyTime)
+                    rS_YB=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+                  
 
-                s.send(b'GSO EE\r\n')
-                time.sleep(sleepyTime)
-                rS_EE=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+                    s.send(b'GSO EE\r\n')
+                    time.sleep(sleepyTime)
+                    rS_EE=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+                    
+
+                    s.send(b'GSO IR\r\n')
+                    time.sleep(sleepyTime)
+                    rS_IR=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+           
+
+                    s.send(b'GSO TV\r\n')
+                    time.sleep(sleepyTime)
+                    rS_TV=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+
+
+                    s.send(b'GSO FC\r\n')
+                    time.sleep(sleepyTime)
+                    rS_FC=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+          
+
+                    s.send(b'GSO FV\r\n')
+                    time.sleep(sleepyTime)
+                    rS_FV=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+
+
+                    s.send(b'GSO TC\r\n')
+                    time.sleep(sleepyTime)
+                    rS_TC=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+                     
+
+                    s.send(b'GSO EC\r\n')
+                    time.sleep(sleepyTime)
+                    rS_EC=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+
+
+                rS_String=(","+str(rS_IE) + ","+str(rS_YF)+ ","+str(rS_YB)+ "," +
+                            rS_EE+ "," +
+                            rS_IR+ "," +
+                            rS_TV+ "," +
+                            rS_FC+ "," +
+                            rS_FV+ "," +
+                            rS_TC+ "," +
+                            rS_EC+ ",")
+
+                #Separate the string
+                spec=(returnString.decode("utf-8"))
+                rS=(str(SV)+","+spec)
+                rS=rS[0:-5]
+                spectrum=rS.split(',')
+
+                rS_.append(rS_String)
+                iE_.append(float(spectrum[0]))
+                L5_.append(float(spectrum[8]))
+                L4_.append(float(spectrum[9]))
+                L3_.append(float(spectrum[10]))
+                L2_.append(float(spectrum[11]))
+                L1_.append(float(spectrum[12]))
+                Ax_.append(float(spectrum[13]))
+                H1_.append(float(spectrum[14]))
+                H2_.append(float(spectrum[15]))
+                H3_.append(float(spectrum[16]))
+                H4_.append(float(spectrum[16]))
+         
+                iE=iE_
+                L5=L5_
+                L4=L4_
+                L3=L3_
+                L2=L2_
+                L1=L1_
+                Ax=Ax_
+                H1=H1_
+                H2=H2_
+                H3=H3_
+                H4=H4_
+                rS=rS_
+
+                N=len(iE)
+               # print (N,"N")
                 
-
-                s.send(b'GSO IR\r\n')
-                time.sleep(sleepyTime)
-                rS_IR=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
-       
-
-                s.send(b'GSO TV\r\n')
-                time.sleep(sleepyTime)
-                rS_TV=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+                p=GraphFrame.plot()
 
 
-                s.send(b'GSO FC\r\n')
-                time.sleep(sleepyTime)
-                rS_FC=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
-      
+                
+                SV=SV+StepSize
 
-                s.send(b'GSO FV\r\n')
-                time.sleep(sleepyTime)
-                rS_FV=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
-
-
-                s.send(b'GSO TC\r\n')
-                time.sleep(sleepyTime)
-                rS_TC=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
-                 
-
-                s.send(b'GSO EC\r\n')
-                time.sleep(sleepyTime)
-                rS_EC=s.recv(1024).decode("utf-8")
-                time.sleep(sleepyTime)
-                rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
-
-
-            rS_String=(","+str(rS_IE) + ","+str(rS_YF)+ ","+str(rS_YB)+ "," +
-                        rS_EE+ "," +
-                        rS_IR+ "," +
-                        rS_TV+ "," +
-                        rS_FC+ "," +
-                        rS_FV+ "," +
-                        rS_TC+ "," +
-                        rS_EC+ ",")
-
-            #Separate the string
-            spec=(returnString.decode("utf-8"))
-            rS=(str(SV)+","+spec)
-            rS=rS[0:-5]
-            spectrum=rS.split(',')
-
-            rS_.append(rS_String)
-            iE_.append(float(spectrum[0]))
-            L5_.append(float(spectrum[8]))
-            L4_.append(float(spectrum[9]))
-            L3_.append(float(spectrum[10]))
-            L2_.append(float(spectrum[11]))
-            L1_.append(float(spectrum[12]))
-            Ax_.append(float(spectrum[13]))
-            H1_.append(float(spectrum[14]))
-            H2_.append(float(spectrum[15]))
-            H3_.append(float(spectrum[16]))
-            H4_.append(float(spectrum[16]))
-     
-            iE=iE_
-            L5=L5_
-            L4=L4_
-            L3=L3_
-            L2=L2_
-            L1=L1_
-            Ax=Ax_
-            H1=H1_
-            H2=H2_
-            H3=H3_
-            H4=H4_
-            rS=rS_
-
-            N=len(iE)
-           # print (N,"N")
+            s.send(b'SetSourceOutput IE,1100.0000\r\n')
+            time.sleep(0.2)
+            print (s.recv(1024))    
             
-            p=GraphFrame.plot()
 
+            self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)
 
             
-            SV=SV+StepSize
 
-        s.send(b'SetSourceOutput IE,1100.0000\r\n')
-        time.sleep(0.2)
-        print (s.recv(1024))    
+            #Reset all the arrays
+
+            iE.clear()
+            L5.clear()
+            L4.clear()
+            L3.clear()
+            L2.clear()
+            L1.clear()
+            Ax.clear()
+            H1.clear()
+            H2.clear()
+            H3.clear()
+            H4.clear()
+            rS_.clear()
+            
+            scans=scans+1     
+
         s.close()
-
-        self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)
+        
 
     def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_):
         print("Output Data to File")
