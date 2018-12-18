@@ -131,13 +131,13 @@ class GraphFrame(tk.Frame):
 
         while scans < total_scans:
             SV_BL=0
-            TV_BL=60
+            TV_BL=30
             SV_Peak=0
             TV_Peak=TV_BL
             StepSize=1
 
-            IE_Baseline=1320
-            IE_Peak=1380
+            IE_Baseline=1526
+            IE_Peak=1803
 
             #print ("Scans Number",scans+1)
             
@@ -149,7 +149,7 @@ class GraphFrame(tk.Frame):
             time.sleep(0.1)
             IEreturn=(s.recv(1024))
             time.sleep(0.1)    
-            time.sleep(60)            
+            time.sleep(300)            
 
             while SV_BL < TV_BL:
                 #print ("Scans Number",scans,"Voltage",SV_BL)
@@ -313,7 +313,7 @@ class GraphFrame(tk.Frame):
             time.sleep(0.1)
             IEreturn=(s.recv(1024))
             time.sleep(0.1)    
-            time.sleep(60)
+          #  time.sleep(60)
             
             while SV_Peak < TV_Peak:
                 #print ("Scans Number",scans,"Voltage",SV_BL+SV_Peak)

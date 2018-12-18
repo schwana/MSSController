@@ -123,9 +123,14 @@ class GraphFrame(tk.Frame):
         total_scans=3
 
         while scans < total_scans:
-            SV=1300.000
-            TV=1550.000
-            StepSize=0.5
+            SV=1450.000
+            TV=1850.000
+            StepSize=2
+
+            print ("Initialise Source Voltage")
+            s.send(b'SetSourceOutput IE,1450.0000\r\n')
+           # time.sleep(60)
+            Dummy=(s.recv(1024).decode("utf-8"))
 
             print ("Scans Number",scans+1)
             
@@ -278,7 +283,7 @@ class GraphFrame(tk.Frame):
                 
                 SV=SV+StepSize
 
-            s.send(b'SetSourceOutput IE,1100.0000\r\n')
+            s.send(b'SetSourceOutput IE,1450.0000\r\n')
             time.sleep(0.2)
             print (s.recv(1024))    
             
@@ -328,7 +333,7 @@ class GraphFrame(tk.Frame):
         #Read Inlet Line
         rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read)')
         foInitial = open(FileName,"a")
-        foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4"+rS_top+"\n")
+        foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,"+rS_top+"\n")
 
         foInitial.close()
 
