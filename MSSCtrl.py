@@ -44,19 +44,40 @@ class GraphFrame(tk.Frame):
         menu = tk.Menu(self.master)
         self.master.config(menu=menu)
 
-        file = tk.Menu(menu)
-        file.add_command(label="Run", command=self.openFile)
-        file.add_command(label="Exit", command=self.exit)
-        menu.add_cascade(label="Scan", menu=file)
+        scan = tk.Menu(menu)
+        scan.add_command(label="Run", command=self.RunScan)
+        scan.add_command(label="Exit", command=self.exit)
+        menu.add_cascade(label="Scan", menu=scan)
+        
+        data = tk.Menu(menu)
+        data.add_command(label="Open File", command=self.openFile)
+        menu.add_cascade(label="Data", menu=data)
+        
+        settings = tk.Menu(menu)
+        settings.add_command(label="Acq Time")
+        menu.add_cascade(label="Settings", menu=settings)
 
-        edit = tk.Menu(menu)
-        edit.add_command(label="Undo")
-        menu.add_cascade(label="Edit", menu=edit)
+        #Check to see if the Mass Spec is attached.
+        #If it isn't, will need to run in offline mode.
+        print ("Attempting to connect to mass spec")
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+        try: 
+            print (s.recv(1024).decode("utf-8"))
+            s.connect(('localhost',1090))
+        except socket.error as e:
+            print(e)
+        s.close()
             
     def exit(self):
         exit()
 
-    def openFile(self):
+    def RunScan(self):
+
+        acqTime=100
+        acqRestTime=0.2+(acqTime/1000)
+        acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
+        
         if Controls.FS_checked.get():
             print("Fast Scan")
             FastScan=True
@@ -85,11 +106,14 @@ class GraphFrame(tk.Frame):
         s.send(b'SetSourceOutput IE,1300.0000\r\n')
         time.sleep(0.2)
         Dummy=(s.recv(1024).decode("utf-8"))
-        s.send(b'SetAcqPeriod 100\r\n')
+        s.send(str.encode(acqAStr))
         time.sleep(0.2)
+        
+        #s.send(b'SetAcqPeriod 100\r\n')
+        
         Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
 
-        print (Dummy)
+        #print (Dummy)
         
         #Scan across peak
         global spectrum
@@ -136,18 +160,28 @@ class GraphFrame(tk.Frame):
             
 
             while SV < TV:
-                print ("Scans Number",scans,"Voltage",SV)
-                BStr=("SetSourceOutput IE,")
-                CStr=(str(SV)+"\r\n")
-                AStr=BStr+CStr
-                s.send(str.encode(AStr))
+                print ("Scan Number",scans,"Voltage",SV)
+
+                #Set Source Voltage
+##                BStr=("SetSourceOutput IE,")
+##                CStr=(str(SV)+"\r\n")
+##                AStr=BStr+CStr
+##                s.send(str.encode(AStr))
+                
+                SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
+                s.send(str.encode(SVStr))
+
                 time.sleep(0.1)
                 IEreturn=(s.recv(1024))
                 time.sleep(0.1)
-                s.send(b'StartAcq 1,XX\r\n')
-                time.sleep(0.3)
+                
+                #Acquire Data - waitfor enough time for the buffer to fill....
+                s.send(b'StartAcq 1,JS\r\n')
+                time.sleep(acqRestTime)
                 returnString=s.recv(1024)
                 time.sleep(0.1)
+
+                #Get the Isotopx voltages (unless running a fast scan)
                 if FastScan:
                   rS_IE=("0,0")
                   rS_YF=("0,0")
@@ -312,6 +346,85 @@ class GraphFrame(tk.Frame):
         s.close()
         
 
+    def openFile(self):
+        global spectrum
+        #Open file to read spectrum
+        root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("dat files","*.dat"),("all files","*.*")))
+
+        try:
+            spectrum=np.genfromtxt(root.filename,delimiter=',', invalid_raise = False, names=True)
+        except Warning as e:
+           print (e)
+
+        self.channelConv()
+
+    def channelConv(self):
+        j=0
+        global spectrum
+        
+        iE_=[]
+        L5_=[]
+        L4_=[]
+        L3_=[]
+        L2_=[]
+        L1_=[]
+        Ax_=[]
+        H1_=[]
+        H2_=[]
+        H3_=[]
+        H4_=[]
+         
+        while j<len(spectrum):
+            dataLine=spectrum[j]
+            dataString=str(dataLine)
+            dataLine=(dataString[1:-1])
+            splitString=dataLine.split(',')
+            
+            iE_.append(float(splitString[0]))
+            L5_.append(float(splitString[1]))
+            L4_.append(float(splitString[2]))
+            L3_.append(float(splitString[3]))
+            L2_.append(float(splitString[4]))
+            L1_.append(float(splitString[5]))
+            Ax_.append(float(splitString[6]))
+            H1_.append(float(splitString[7]))
+            H2_.append(float(splitString[8]))
+            H3_.append(float(splitString[9]))
+            H4_.append(float(splitString[10]))
+        
+            j=j+1
+        #Make the channels global
+            
+        global iE
+        global L5
+        global L4
+        global L3
+        global L2
+        global L1
+        global Ax
+        global H1
+        global H2
+        global H3
+        global H4
+        global N
+
+        iE=iE_
+        L5=L5_
+        L4=L4_
+        L3=L3_
+        L2=L2_
+        L1=L1_
+        Ax=Ax_
+        H1=H1_
+        H2=H2_
+        H3=H3_
+        H4=H4_
+
+        N=len(iE)
+        print (N,"N")
+        
+        p=GraphFrame.plot()
+
     def outputData(self, iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_):
         print("Output Data to File")
 
@@ -360,7 +473,6 @@ class GraphFrame(tk.Frame):
         
         foUpdate = open("ScanNum.txt", "w")
         
-        
         foUpdate.write(str(S))
 
         foUpdate.close()       
@@ -406,11 +518,9 @@ class GraphFrame(tk.Frame):
 
     def UpdatePlot():
         #Check to see if a scan is loaded. If iE is empty then dont call the plot
- #       print ("N", N)
         if (N>0):
             p=GraphFrame.plot()
-##        else:
-##            print ("iE off")
+
 
   
 class Controls(tk.Frame):
