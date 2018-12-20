@@ -14,26 +14,36 @@ from tkinter import filedialog
 
 matplotlib.use("TkAgg")
 
-
 N=0
 root = tk.Tk()
-fig = plt.Figure()
-canvas = FigureCanvasTkAgg(fig, root)
-canvas.get_tk_widget().pack()
+
+frame1 = tk.Frame(root, borderwidth=10)
+fig = plt.Figure(figsize=(6,4),dpi=100)
+canvas = FigureCanvasTkAgg(fig, frame1)
+#canvas.get_tk_widget().pack(side="left", fill="x")
 ax = fig.add_subplot(111)
-toolbar = NavigationToolbar2Tk(canvas, root)
+toolbar = NavigationToolbar2Tk(canvas, frame1)
 toolbar.update()
+frame1.pack(side=tk.LEFT, fill=tk.X)
+canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
+
+frame2=tk.Frame(root, width=400, height=400, bg="", colormap="new", borderwidth=10)
+frame2.pack(side=tk.RIGHT, fill=tk.X)
 
 
         
 class GraphFrame(tk.Frame):
 
     def __init__(self, master=None):
+
+        
         
         tk.Frame.__init__(self, master)   
         self.master = master
         self.init_window()
+        
 
+        
     def init_window(self):
 
         self.master.title("SpecView")
@@ -59,15 +69,17 @@ class GraphFrame(tk.Frame):
 
         #Check to see if the Mass Spec is attached.
         #If it isn't, will need to run in offline mode.
-        print ("Attempting to connect to mass spec")
-        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(10)
-        try: 
-            print (s.recv(1024).decode("utf-8"))
-            s.connect(('localhost',1090))
-        except socket.error as e:
-            print(e)
-        s.close()
+##        print ("Attempting to connect to mass spec")
+##        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+##        s.settimeout(10)
+##        try: 
+##            print (s.recv(1024).decode("utf-8"))
+##            s.connect(('localhost',1090))
+##        except socket.error as e:
+##            print(e)
+##        s.close()
+        
+
             
     def exit(self):
         exit()
@@ -521,16 +533,15 @@ class GraphFrame(tk.Frame):
         if (N>0):
             p=GraphFrame.plot()
 
-
-  
 class Controls(tk.Frame):
     
     def __init__(self, root):
         tk.Frame.__init__(self, root)
 
     def callback(*args):
-    #    print ("variable changed!")
         GraphFrame.UpdatePlot()
+
+    
         
     L5_checked = tk.IntVar()
     L5_checked.trace("w", callback)
@@ -574,43 +585,59 @@ class Controls(tk.Frame):
 
     FS_checked = tk.IntVar()
     FS_checked.trace("w", callback)
-    FS_checked.set(0)
+    FS_checked.set(1)
 
-    c1=tk.Checkbutton(root, text="L5", onvalue=1, offvalue=0, variable=L5_checked)
-    c2=tk.Checkbutton(root, text="L4", onvalue=1, offvalue=0, variable=L4_checked)
-    c3=tk.Checkbutton(root, text="L3", onvalue=1, offvalue=0, variable=L3_checked)
-    c4=tk.Checkbutton(root, text="L2", onvalue=1, offvalue=0, variable=L2_checked)
-    c5=tk.Checkbutton(root, text="L1", onvalue=1, offvalue=0, variable=L1_checked)
-    c6=tk.Checkbutton(root, text="Ax", onvalue=1, offvalue=0, variable=Ax_checked)
-    c7=tk.Checkbutton(root, text="H1", onvalue=1, offvalue=0, variable=H1_checked)
-    c8=tk.Checkbutton(root, text="H2", onvalue=1, offvalue=0, variable=H2_checked)
-    c9=tk.Checkbutton(root, text="H3", onvalue=1, offvalue=0, variable=H3_checked)
-    c10=tk.Checkbutton(root, text="H4", onvalue=1, offvalue=0, variable=H4_checked)
-    c11=tk.Checkbutton(root, text="Fast Scan", onvalue=1, offvalue=0, variable=FS_checked)
+    CtrlFrame1= tk.Frame(frame2)
+    CtrlFrame2= tk.Frame(frame2)
+    CtrlFrame3= tk.Frame(frame2)
+
+    c1=tk.Checkbutton(CtrlFrame1, text="L5", onvalue=1, offvalue=0, variable=L5_checked)
+    c2=tk.Checkbutton(CtrlFrame1, text="L4", onvalue=1, offvalue=0, variable=L4_checked)
+    c3=tk.Checkbutton(CtrlFrame1, text="L3", onvalue=1, offvalue=0, variable=L3_checked)
+    c4=tk.Checkbutton(CtrlFrame1, text="L2", onvalue=1, offvalue=0, variable=L2_checked)
+    c5=tk.Checkbutton(CtrlFrame1, text="L1", onvalue=1, offvalue=0, variable=L1_checked)
+    c6=tk.Checkbutton(CtrlFrame2, text="Ax", onvalue=1, offvalue=0, variable=Ax_checked)
+    c7=tk.Checkbutton(CtrlFrame2, text="H1", onvalue=1, offvalue=0, variable=H1_checked)
+    c8=tk.Checkbutton(CtrlFrame2, text="H2", onvalue=1, offvalue=0, variable=H2_checked)
+    c9=tk.Checkbutton(CtrlFrame2, text="H3", onvalue=1, offvalue=0, variable=H3_checked)
+    c10=tk.Checkbutton(CtrlFrame2, text="H4", onvalue=1, offvalue=0, variable=H4_checked)
+    c11=tk.Checkbutton(CtrlFrame3, text="Fast Scan", onvalue=1, offvalue=0, variable=FS_checked)
     
-    c1.pack(side="left", fill="x")
-    c2.pack(side="left", fill="x")
-    c3.pack(side="left", fill="x")
-    c4.pack(side="left", fill="x")
-    c5.pack(side="left", fill="x")
-    c6.pack(side="left", fill="x")
-    c7.pack(side="left", fill="x")
-    c8.pack(side="left", fill="x")
-    c9.pack(side="left", fill="x")
-    c10.pack(side="left", fill="x")
-    c11.pack(side="left", fill="x")
+    c1.pack(side="left", fill="both")
+    c2.pack(side="left", fill="both")
+    c3.pack(side="left", fill="both")
+    c4.pack(side="left", fill="both")
+    c5.pack(side="left", fill="both")
+    c6.pack(side="left", fill="both")
+    c7.pack(side="left", fill="both")
+    c8.pack(side="left", fill="both")
+    c9.pack(side="left", fill="both")
+    c10.pack(side="left", fill="both")
+    c11.pack(side="right", fill="both")
+
+    
+
+    b = tk.Button(CtrlFrame3, text="OK", command=callback)
+    b.pack()
+    
+    CtrlFrame1.pack(side=tk.TOP, fill=tk.NONE)
+    CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE)
+    CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE)
+
+    
+    
         
 # root window created. Here, that would be the only window, but
 # you can later have windows within windows.
 
-root.geometry("800x600")
+root.geometry("900x600")
 
 #creation of an instance
 graph = GraphFrame(root)
 controls=Controls(root)
 
 graph.pack(side="left", fill="x")
-controls.pack(side="bottom", fill="x")
+controls.pack(side="right", fill="both")
 
 #mainloop 
 root.mainloop()
