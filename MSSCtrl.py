@@ -590,6 +590,7 @@ class Controls(tk.Frame):
     CtrlFrame1= tk.Frame(frame2)
     CtrlFrame2= tk.Frame(frame2)
     CtrlFrame3= tk.Frame(frame2)
+    ReadingsFrame=tk.Frame(frame2)
 
     c1=tk.Checkbutton(CtrlFrame1, text="L5", onvalue=1, offvalue=0, variable=L5_checked)
     c2=tk.Checkbutton(CtrlFrame1, text="L4", onvalue=1, offvalue=0, variable=L4_checked)
@@ -624,8 +625,6 @@ class Controls(tk.Frame):
     CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE)
     CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE)
 
-    
-    
         
 # root window created. Here, that would be the only window, but
 # you can later have windows within windows.
