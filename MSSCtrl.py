@@ -78,9 +78,11 @@ class GraphFrame(tk.Frame):
 ##        except socket.error as e:
 ##            print(e)
 ##        s.close()
-        
         Controls.ReadMassSpec()
-            
+
+
+
+           
     def exit(self):
         exit()
 
@@ -195,16 +197,16 @@ class GraphFrame(tk.Frame):
 
                 #Get the Isotopx voltages (unless running a fast scan)
                 if FastScan:
-                  rS_IE=("0,0")
-                  rS_YF=("0,0")
-                  rS_YB=("0,0")
-                  rS_EE=("0,0")
-                  rS_IR=("0,0")
-                  rS_TV=("0,0")
-                  rS_FC=("0,0")
-                  rS_FV=("0,0")
-                  rS_TC=("0,0")
-                  rS_EC=("0,0")
+                    rS_IE=("0,0")
+                    rS_YF=("0,0")
+                    rS_YB=("0,0")
+                    rS_EE=("0,0")
+                    rS_IR=("0,0")
+                    rS_TV=("0,0")
+                    rS_FC=("0,0")
+                    rS_FV=("0,0")
+                    rS_TC=("0,0")
+                    rS_EC=("0,0")
                 else:
                     #Get readbacks of voltages
                     sleepyTime=0.1
@@ -568,8 +570,9 @@ class Controls(tk.Frame):
         rS_IE=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+        splitString=rs_IE.split(',')
         Controls.iERead.delete(0,tk.END)
-        Controls.iERead.insert(1,rS_IE)
+        Controls.iERead.insert(1,splitString[1])
 
         
         s.send(b'GSO YF\r\n')
@@ -577,32 +580,36 @@ class Controls(tk.Frame):
         rS_YF=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+        splitString=rs_YF.split(',')
         Controls.yFRead.delete(0,tk.END)
-        Controls.yFRead.insert(1,rS_YF)
+        Controls.yFRead.insert(1,splitString[1])
 
         s.send(b'GSO YB\r\n')
         time.sleep(sleepyTime)
         rS_YB=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+        splitString=rs_YB.split(',')
         Controls.yBRead.delete(0,tk.END)
-        Controls.yBRead.insert(1,rS_YB)      
+        Controls.yBRead.insert(1,splitString[1])      
 
         s.send(b'GSO EE\r\n')
         time.sleep(sleepyTime)
         rS_EE=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+        splitString=rs_EE.split(',')
         Controls.EERead.delete(0,tk.END)
-        Controls.EERead.insert(1,rS_EE)        
+        Controls.EERead.insert(1,splitString[1])        
 
         s.send(b'GSO IR\r\n')
         time.sleep(sleepyTime)
         rS_IR=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+        splitString=rs_IR.split(',')
         Controls.IRRead.delete(0,tk.END)
-        Controls.IRRead.insert(1,rS_IR)
+        Controls.IRRead.insert(1,splitString[1])
 
         s.send(b'GSO TV\r\n')
         time.sleep(sleepyTime)
@@ -610,39 +617,43 @@ class Controls(tk.Frame):
         time.sleep(sleepyTime)
         rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
         Controls.TVRead.delete(0,tk.END)
-        Controls.TVRead.insert(1,rS_TV)
+        Controls.TVRead.insert(1,splitString[1])
 
         s.send(b'GSO FC\r\n')
         time.sleep(sleepyTime)
         rS_FC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+        splitString=rs_FC.split(',')
         Controls.FCRead.delete(0,tk.END)
-        Controls.FCRead.insert(1,rS_FC)
+        Controls.FCRead.insert(1,splitString[1])
 
         s.send(b'GSO FV\r\n')
         time.sleep(sleepyTime)
         rS_FV=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+        splitString=rs_FV.split(',')
         Controls.FVRead.delete(0,tk.END)
-        Controls.FVRead.insert(1,rS_FV)
+        Controls.FVRead.insert(1,splitString[1])
 
         s.send(b'GSO TC\r\n')
         time.sleep(sleepyTime)
         rS_TC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+        splitString=rs_TC.split(',')
         Controls.TCRead.delete(0,tk.END)
-        Controls.TCRead.insert(1,rS_TC)         
+        Controls.TCRead.insert(1,splitString[1])         
 
         s.send(b'GSO EC\r\n')
         time.sleep(sleepyTime)
         rS_EC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+        splitString=rs_EC.split(',')
         Controls.ECRead.delete(0,tk.END)
-        Controls.ECRead.insert(1,rS_EC)
+        Controls.ECRead.insert(1,splitString[1])
         
         s.close()
 
