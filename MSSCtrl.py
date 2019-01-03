@@ -570,7 +570,7 @@ class Controls(tk.Frame):
         rS_IE=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
-        splitString=rs_IE.split(',')
+        splitString=rS_IE.split(',')
         Controls.iERead.delete(0,tk.END)
         Controls.iERead.insert(1,splitString[1])
 
@@ -580,7 +580,7 @@ class Controls(tk.Frame):
         rS_YF=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
-        splitString=rs_YF.split(',')
+        splitString=rS_YF.split(',')
         Controls.yFRead.delete(0,tk.END)
         Controls.yFRead.insert(1,splitString[1])
 
@@ -589,7 +589,7 @@ class Controls(tk.Frame):
         rS_YB=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
-        splitString=rs_YB.split(',')
+        splitString=rS_YB.split(',')
         Controls.yBRead.delete(0,tk.END)
         Controls.yBRead.insert(1,splitString[1])      
 
@@ -598,7 +598,7 @@ class Controls(tk.Frame):
         rS_EE=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
-        splitString=rs_EE.split(',')
+        splitString=rS_EE.split(',')
         Controls.EERead.delete(0,tk.END)
         Controls.EERead.insert(1,splitString[1])        
 
@@ -607,7 +607,7 @@ class Controls(tk.Frame):
         rS_IR=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
-        splitString=rs_IR.split(',')
+        splitString=rS_IR.split(',')
         Controls.IRRead.delete(0,tk.END)
         Controls.IRRead.insert(1,splitString[1])
 
@@ -616,6 +616,7 @@ class Controls(tk.Frame):
         rS_TV=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+        splitString=rS_TV.split(',')
         Controls.TVRead.delete(0,tk.END)
         Controls.TVRead.insert(1,splitString[1])
 
@@ -624,7 +625,7 @@ class Controls(tk.Frame):
         rS_FC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
-        splitString=rs_FC.split(',')
+        splitString=rS_FC.split(',')
         Controls.FCRead.delete(0,tk.END)
         Controls.FCRead.insert(1,splitString[1])
 
@@ -633,7 +634,7 @@ class Controls(tk.Frame):
         rS_FV=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
-        splitString=rs_FV.split(',')
+        splitString=rS_FV.split(',')
         Controls.FVRead.delete(0,tk.END)
         Controls.FVRead.insert(1,splitString[1])
 
@@ -642,7 +643,7 @@ class Controls(tk.Frame):
         rS_TC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
-        splitString=rs_TC.split(',')
+        splitString=rS_TC.split(',')
         Controls.TCRead.delete(0,tk.END)
         Controls.TCRead.insert(1,splitString[1])         
 
@@ -651,7 +652,7 @@ class Controls(tk.Frame):
         rS_EC=s.recv(1024).decode("utf-8")
         time.sleep(sleepyTime)
         rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
-        splitString=rs_EC.split(',')
+        splitString=rS_EC.split(',')
         Controls.ECRead.delete(0,tk.END)
         Controls.ECRead.insert(1,splitString[1])
         
