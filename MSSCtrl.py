@@ -27,7 +27,7 @@ toolbar.update()
 frame1.pack(side=tk.LEFT, fill=tk.X)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
 
-frame2=tk.Frame(root, width=400, height=400, bg="", colormap="new", borderwidth=10)
+frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
 frame2.pack(side=tk.RIGHT, fill=tk.X)
 
 
@@ -79,7 +79,7 @@ class GraphFrame(tk.Frame):
 ##            print(e)
 ##        s.close()
         
-
+        Controls.ReadMassSpec()
             
     def exit(self):
         exit()
@@ -541,8 +541,251 @@ class Controls(tk.Frame):
     def callback(*args):
         GraphFrame.UpdatePlot()
 
-    
+    def ReadMassSpec():
+        #Read the mass spec
+        print ("Reading mass Spec")
+
+        #Connect to instrument
+        print ("Connecting to mass spec")
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+        s.connect(('localhost',1090))
+        print (s.recv(1024).decode("utf-8"))
+
+        #Login
+        s.send(b'login i,pw \r\n')
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
+        s.send(b'ver\r\n')
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
+
+        #Get readbacks of voltages
+        sleepyTime=0.1
+        s.send(b'GSO IE\r\n')
+        time.sleep(sleepyTime)
+        rS_IE=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+        Controls.iERead.delete(0,tk.END)
+        Controls.iERead.insert(1,rS_IE)
+
         
+        s.send(b'GSO YF\r\n')
+        time.sleep(sleepyTime)
+        rS_YF=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+        Controls.yFRead.delete(0,tk.END)
+        Controls.yFRead.insert(1,rS_YF)
+
+        s.send(b'GSO YB\r\n')
+        time.sleep(sleepyTime)
+        rS_YB=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+        Controls.yBRead.delete(0,tk.END)
+        Controls.yBRead.insert(1,rS_YB)      
+
+        s.send(b'GSO EE\r\n')
+        time.sleep(sleepyTime)
+        rS_EE=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+        Controls.EERead.delete(0,tk.END)
+        Controls.EERead.insert(1,rS_EE)        
+
+        s.send(b'GSO IR\r\n')
+        time.sleep(sleepyTime)
+        rS_IR=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+        Controls.IRRead.delete(0,tk.END)
+        Controls.IRRead.insert(1,rS_IR)
+
+        s.send(b'GSO TV\r\n')
+        time.sleep(sleepyTime)
+        rS_TV=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+        Controls.TVRead.delete(0,tk.END)
+        Controls.TVRead.insert(1,rS_TV)
+
+        s.send(b'GSO FC\r\n')
+        time.sleep(sleepyTime)
+        rS_FC=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+        Controls.FCRead.delete(0,tk.END)
+        Controls.FCRead.insert(1,rS_FC)
+
+        s.send(b'GSO FV\r\n')
+        time.sleep(sleepyTime)
+        rS_FV=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+        Controls.FVRead.delete(0,tk.END)
+        Controls.FVRead.insert(1,rS_FV)
+
+        s.send(b'GSO TC\r\n')
+        time.sleep(sleepyTime)
+        rS_TC=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+        Controls.TCRead.delete(0,tk.END)
+        Controls.TCRead.insert(1,rS_TC)         
+
+        s.send(b'GSO EC\r\n')
+        time.sleep(sleepyTime)
+        rS_EC=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+        rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+        Controls.ECRead.delete(0,tk.END)
+        Controls.ECRead.insert(1,rS_EC)
+        
+        s.close()
+
+
+
+
+        
+
+
+    #FRAME FOR SETTINGS (ION ENERGY ETC)
+    TopRow=tk.Frame(frame2)
+    lblLbl = tk.Label(TopRow, text="  ",width=10,anchor='w')
+    lblLbl.pack(side=tk.LEFT)
+    lblFrom = tk.Label(TopRow, text="From",width=8,anchor='w')
+    lblFrom.pack(side=tk.LEFT)
+    lblTo = tk.Label(TopRow, text="To",width=8,anchor='w')
+    lblTo.pack(side=tk.LEFT)
+    lblRead = tk.Label(TopRow, text="Read",width=8,anchor='w')
+    lblRead.pack(side=tk.LEFT)
+    TopRow.pack(side=tk.TOP, fill=tk.NONE)
+    #Ion Energy
+    iEFrame=tk.Frame(frame2)
+    iElbl = tk.Label(iEFrame, text="iE",width=5,anchor='w')
+    iElbl.pack(side=tk.LEFT)
+    iEFrom = tk.Entry(iEFrame,width=8)
+    iEFrom.pack(side="left",padx=5)
+    iETo = tk.Entry(iEFrame,width=8)
+    iETo.pack(side="left",padx=5)
+    iERead = tk.Entry(iEFrame,width=8)
+    iERead.pack(side="left",padx=5)
+    iEFrame.pack(side=tk.TOP, fill=tk.NONE)
+    #YFocus
+    YFframe=tk.Frame(frame2)
+    yFlbl = tk.Label(YFframe, text="YF",width=5,anchor='w')
+    yFlbl.pack(side=tk.LEFT)
+    yFFrom = tk.Entry(YFframe,width=8)
+    yFFrom.pack(side="left",padx=5)
+    yFTo = tk.Entry(YFframe,width=8)
+    yFTo.pack(side="left",padx=5)
+    yFRead = tk.Entry(YFframe,width=8)
+    yFRead.pack(side="left",padx=5)
+    YFframe.pack(side=tk.TOP, fill=tk.NONE)
+    #YBias
+    YBframe=tk.Frame(frame2)
+    yBlbl = tk.Label(YBframe, text="YB",width=5,anchor='w')
+    yBlbl.pack(side=tk.LEFT)
+    yBFrom = tk.Entry(YBframe,width=8)
+    yBFrom.pack(side="left",padx=5)
+    yBTo = tk.Entry(YBframe,width=8)
+    yBTo.pack(side="left",padx=5)
+    yBRead = tk.Entry(YBframe,width=8)
+    yBRead.pack(side="left",padx=5)
+    YBframe.pack(side=tk.TOP, fill=tk.NONE)
+    #Electron Energy
+    EEframe=tk.Frame(frame2)
+    EElbl = tk.Label(EEframe, text="EE",width=5,anchor='w')
+    EElbl.pack(side=tk.LEFT)
+    EEFrom = tk.Entry(EEframe,width=8)
+    EEFrom.pack(side="left",padx=5)
+    EETo = tk.Entry(EEframe,width=8)
+    EETo.pack(side="left",padx=5)
+    EERead = tk.Entry(EEframe,width=8)
+    EERead.pack(side="left",padx=5)
+    EEframe.pack(side=tk.TOP, fill=tk.NONE)
+    #Ion repeller
+    IRframe=tk.Frame(frame2)
+    IRlbl = tk.Label(IRframe, text="IR",width=5,anchor='w')
+    IRlbl.pack(side=tk.LEFT)
+    IRFrom = tk.Entry(IRframe,width=8)
+    IRFrom.pack(side="left",padx=5)
+    IRTo = tk.Entry(IRframe,width=8)
+    IRTo.pack(side="left",padx=5)
+    IRRead = tk.Entry(IRframe,width=8)
+    IRRead.pack(side="left",padx=5)
+    IRframe.pack(side=tk.TOP, fill=tk.NONE)
+    #Trap Voltage
+    TVframe=tk.Frame(frame2)
+    TVlbl = tk.Label(TVframe, text="TV",width=5,anchor='w')
+    TVlbl.pack(side=tk.LEFT)
+    TVFrom = tk.Entry(TVframe,width=8)
+    TVFrom.pack(side="left",padx=5)
+    TVTo = tk.Entry(TVframe,width=8)
+    TVTo.pack(side="left",padx=5)
+    TVRead = tk.Entry(TVframe,width=8)
+    TVRead.pack(side="left",padx=5)
+    TVframe.pack(side=tk.TOP, fill=tk.NONE)        
+    #Filament Current
+    FCframe=tk.Frame(frame2)
+    FClbl = tk.Label(FCframe, text="FC",width=5,anchor='w')
+    FClbl.pack(side=tk.LEFT)
+    FCFrom = tk.Label(FCframe, text="",width=8)
+    FCFrom.pack(side="left",padx=0)
+    FCTo =  tk.Label(FCframe, text="",width=8)
+    FCTo.pack(side="left",padx=0)
+    FCRead = tk.Entry(FCframe,width=8)
+    FCRead.pack(side="left",padx=5)
+    FCframe.pack(side=tk.TOP, fill=tk.NONE)     
+    #Filament Voltage
+    FVframe=tk.Frame(frame2)
+    FVlbl = tk.Label(FVframe, text="FV",width=5,anchor='w')
+    FVlbl.pack(side=tk.LEFT)
+    FVFrom = tk.Entry(FVframe,width=8)
+    FVFrom.pack(side="left",padx=5)
+    FVTo = tk.Entry(FVframe,width=8)
+    FVTo.pack(side="left",padx=5)
+    FVRead = tk.Entry(FVframe,width=8)
+    FVRead.pack(side="left",padx=5)
+    FVframe.pack(side=tk.TOP, fill=tk.NONE)    
+    #Trap Current
+    TCframe=tk.Frame(frame2)
+    TClbl = tk.Label(TCframe, text="TC",width=5,anchor='w')
+    TClbl.pack(side=tk.LEFT)
+    TCFrom = tk.Label(TCframe, text="",width=8)
+    TCFrom.pack(side="left",padx=0)
+    TCTo = tk.Label(TCframe, text="",width=8)
+    TCTo.pack(side="left",padx=0)
+    TCRead = tk.Entry(TCframe,width=8)
+    TCRead.pack(side="left",padx=5)
+    TCframe.pack(side=tk.TOP, fill=tk.NONE)    
+    #Emission Current
+    ECframe=tk.Frame(frame2)
+    EClbl = tk.Label(ECframe, text="EC",width=5,anchor='w')
+    EClbl.pack(side=tk.LEFT)
+    ECFrom = tk.Label(ECframe, text="",width=8)
+    ECFrom.pack(side="left",padx=0)
+    ECTo = tk.Label(ECframe, text="",width=8)
+    ECTo.pack(side="left",padx=0)
+    ECRead = tk.Entry(ECframe,width=8)
+    ECRead.pack(side="left",padx=5)
+    ECframe.pack(side=tk.TOP, fill=tk.NONE)     
+    #Channels
+    CHframe=tk.Frame(frame2)
+    CHlbl = tk.Label(CHframe, text="Channels",width=20)
+    CHlbl.pack(side=tk.LEFT)
+    CHframe.pack(side=tk.TOP, fill=tk.NONE)     
+
+ 
+
+    
+    CtrlFrame1= tk.Frame(frame2)
+    CtrlFrame2= tk.Frame(frame2)
+    CtrlFrame3= tk.Frame(frame2)   
+
     L5_checked = tk.IntVar()
     L5_checked.trace("w", callback)
     L5_checked.set(0)
@@ -586,12 +829,7 @@ class Controls(tk.Frame):
     FS_checked = tk.IntVar()
     FS_checked.trace("w", callback)
     FS_checked.set(1)
-
-    CtrlFrame1= tk.Frame(frame2)
-    CtrlFrame2= tk.Frame(frame2)
-    CtrlFrame3= tk.Frame(frame2)
-    ReadingsFrame=tk.Frame(frame2)
-
+    
     c1=tk.Checkbutton(CtrlFrame1, text="L5", onvalue=1, offvalue=0, variable=L5_checked)
     c2=tk.Checkbutton(CtrlFrame1, text="L4", onvalue=1, offvalue=0, variable=L4_checked)
     c3=tk.Checkbutton(CtrlFrame1, text="L3", onvalue=1, offvalue=0, variable=L3_checked)
@@ -620,10 +858,14 @@ class Controls(tk.Frame):
 
     b = tk.Button(CtrlFrame3, text="OK", command=callback)
     b.pack()
+
     
-    CtrlFrame1.pack(side=tk.TOP, fill=tk.NONE)
-    CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE)
-    CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE)
+
+    
+    CtrlFrame1.pack(side=tk.TOP, fill=tk.NONE,pady=3)
+    CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE,pady=3)
+    CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE,pady=5)
+    
 
         
 # root window created. Here, that would be the only window, but
