@@ -261,16 +261,18 @@ class GraphFrame(tk.Frame):
         total_scans=1
 
         while scans < total_scans:
-            SV=1450.000
-            TV=1550.000
-            StepSize=1
+            SV=float(Controls.iEFrom.get())
+            TV=float(Controls.iETo.get())
+            #SV=1450.000
+            #TV=1550.000
+            StepSize=0.5
 
-            print ("Initialise Source Voltage")
-            s.send(b'SetSourceOutput IE,1450.0000\r\n')
+            #print ("Initialise Source Voltage")
+            #s.send(b'SetSourceOutput IE,1450.0000\r\n')
            
-            Dummy=(s.recv(1024).decode("utf-8"))
+            #Dummy=(s.recv(1024).decode("utf-8"))
 
-            print ("Scans Number",scans+1)
+            print ("Scan Number",scans+1)
             
 
             while SV < TV:
@@ -388,7 +390,7 @@ class GraphFrame(tk.Frame):
                 rS=rS[0:-5]
                 spectrum=rS.split(',')
 
-                print (spectrum)
+                #print (spectrum)
 
                 rS_.append(rS_String)
                 iE_.append(float(spectrum[0]))
@@ -638,8 +640,14 @@ class Controls(tk.Frame):
         GraphFrame.UpdatePlot()
 
     def TestDef():
-        SV=Controls.iEFrom.get()
+        SV=float(Controls.iEFrom.get())
         print(SV)
+        print (type(SV))
+
+        
+        
+
+        
 
     def ReadMassSpec():
         #Read the mass spec
