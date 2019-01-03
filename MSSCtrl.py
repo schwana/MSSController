@@ -262,7 +262,7 @@ class GraphFrame(tk.Frame):
 
         while scans < total_scans:
             SV=1450.000
-            TV=1850.000
+            TV=1550.000
             StepSize=1
 
             print ("Initialise Source Voltage")
