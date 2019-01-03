@@ -10,6 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import numpy as np
 from tkinter import filedialog
+import threading
 
 
 matplotlib.use("TkAgg")
@@ -30,22 +31,21 @@ canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
 frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
 frame2.pack(side=tk.RIGHT, fill=tk.X)
 
+AqTime = tk.IntVar()
+scanOp = tk.IntVar()
+
 
         
 class GraphFrame(tk.Frame):
 
     def __init__(self, master=None):
-
-        
         
         tk.Frame.__init__(self, master)   
         self.master = master
         self.init_window()
         
-
-        
     def init_window(self):
-
+        
         self.master.title("SpecView")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.NONE)
@@ -64,8 +64,42 @@ class GraphFrame(tk.Frame):
         menu.add_cascade(label="Data", menu=data)
         
         settings = tk.Menu(menu)
-        settings.add_command(label="Acq Time")
+        #settings.add_command(label="Acq Time")
+        aqutime = tk.Menu(settings)
+        settings.add_cascade(label="Acq Time", menu=aqutime)
+
+        
+        
+        aqutime.add_radiobutton(label='100ms', value=100, variable=AqTime)
+        aqutime.add_radiobutton(label='200ms', value=200, variable=AqTime)
+        aqutime.add_radiobutton(label='300ms', value=300, variable=AqTime)
+        aqutime.add_radiobutton(label='400ms', value=400, variable=AqTime)
+        aqutime.add_radiobutton(label='500ms', value=500, variable=AqTime)
+        aqutime.add_radiobutton(label='600ms', value=600, variable=AqTime)
+        aqutime.add_radiobutton(label='700ms', value=700, variable=AqTime)
+        aqutime.add_radiobutton(label='800ms', value=800, variable=AqTime)
+        aqutime.add_radiobutton(label='900ms', value=900, variable=AqTime)
+        aqutime.add_radiobutton(label='1000ms', value=1000, variable=AqTime)
+
+        AqTime.set(100)
+
+        ScanOption = tk.Menu(settings)
+        settings.add_cascade(label="Secondary Scan", menu=ScanOption)
+
+        ScanOption.add_radiobutton(label='None', value=1, variable=scanOp)
+        ScanOption.add_radiobutton(label='Y-Focus', value=2, variable=scanOp)
+        ScanOption.add_radiobutton(label='Y-Bias', value=3, variable=scanOp)
+        ScanOption.add_radiobutton(label='Electron Energy', value=4, variable=scanOp)
+        ScanOption.add_radiobutton(label='Ion Repellar', value=5, variable=scanOp)
+
+        scanOp.set(1)
+
         menu.add_cascade(label="Settings", menu=settings)
+        
+   #     mb_radmenu = tk.Menu(menu)
+   #     menu.configure(menu=mb_radmenu)
+
+        
 
         #Check to see if the Mass Spec is attached.
         #If it isn't, will need to run in offline mode.
@@ -80,17 +114,19 @@ class GraphFrame(tk.Frame):
 ##        s.close()
         Controls.ReadMassSpec()
 
-
-
            
     def exit(self):
+        print(AqTime.get())
         exit()
 
     def RunScan(self):
 
-        acqTime=100
+        #acqTime=100
+        acqTime=AqTime.get()
         acqRestTime=0.2+(acqTime/1000)
         acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
+
+        print(acqRestTime)
         
         if Controls.FS_checked.get():
             print("Fast Scan")
@@ -546,119 +582,121 @@ class Controls(tk.Frame):
     def ReadMassSpec():
         #Read the mass spec
         print ("Reading mass Spec")
-
-        #Connect to instrument
         print ("Connecting to mass spec")
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(10)
-        s.connect(('localhost',1090))
-        print (s.recv(1024).decode("utf-8"))
+        try:
+            #Connect to instrument
 
-        #Login
-        s.send(b'login i,pw \r\n')
-        time.sleep(0.2)
-        print (s.recv(1024).decode("utf-8"))
-        time.sleep(0.2)
-        s.send(b'ver\r\n')
-        time.sleep(0.2)
-        print ("Version"+s.recv(1024).decode("utf-8"))
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
 
-        #Get readbacks of voltages
-        sleepyTime=0.1
-        s.send(b'GSO IE\r\n')
-        time.sleep(sleepyTime)
-        rS_IE=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
-        splitString=rS_IE.split(',')
-        Controls.iERead.delete(0,tk.END)
-        Controls.iERead.insert(1,splitString[1])
+            #Login
+            s.send(b'login i,pw \r\n')
+            time.sleep(0.2)
+            print (s.recv(1024).decode("utf-8"))
+            time.sleep(0.2)
+            s.send(b'ver\r\n')
+            time.sleep(0.2)
+            print ("Version"+s.recv(1024).decode("utf-8"))
 
-        
-        s.send(b'GSO YF\r\n')
-        time.sleep(sleepyTime)
-        rS_YF=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
-        splitString=rS_YF.split(',')
-        Controls.yFRead.delete(0,tk.END)
-        Controls.yFRead.insert(1,splitString[1])
+            #Get readbacks of voltages
+            sleepyTime=0.1
+            s.send(b'GSO IE\r\n')
+            time.sleep(sleepyTime)
+            rS_IE=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+            splitString=rS_IE.split(',')
+            Controls.iERead.delete(0,tk.END)
+            Controls.iERead.insert(1,splitString[1])
 
-        s.send(b'GSO YB\r\n')
-        time.sleep(sleepyTime)
-        rS_YB=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
-        splitString=rS_YB.split(',')
-        Controls.yBRead.delete(0,tk.END)
-        Controls.yBRead.insert(1,splitString[1])      
+            
+            s.send(b'GSO YF\r\n')
+            time.sleep(sleepyTime)
+            rS_YF=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+            splitString=rS_YF.split(',')
+            Controls.yFRead.delete(0,tk.END)
+            Controls.yFRead.insert(1,splitString[1])
 
-        s.send(b'GSO EE\r\n')
-        time.sleep(sleepyTime)
-        rS_EE=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
-        splitString=rS_EE.split(',')
-        Controls.EERead.delete(0,tk.END)
-        Controls.EERead.insert(1,splitString[1])        
+            s.send(b'GSO YB\r\n')
+            time.sleep(sleepyTime)
+            rS_YB=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+            splitString=rS_YB.split(',')
+            Controls.yBRead.delete(0,tk.END)
+            Controls.yBRead.insert(1,splitString[1])      
 
-        s.send(b'GSO IR\r\n')
-        time.sleep(sleepyTime)
-        rS_IR=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
-        splitString=rS_IR.split(',')
-        Controls.IRRead.delete(0,tk.END)
-        Controls.IRRead.insert(1,splitString[1])
+            s.send(b'GSO EE\r\n')
+            time.sleep(sleepyTime)
+            rS_EE=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+            splitString=rS_EE.split(',')
+            Controls.EERead.delete(0,tk.END)
+            Controls.EERead.insert(1,splitString[1])        
 
-        s.send(b'GSO TV\r\n')
-        time.sleep(sleepyTime)
-        rS_TV=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
-        splitString=rS_TV.split(',')
-        Controls.TVRead.delete(0,tk.END)
-        Controls.TVRead.insert(1,splitString[1])
+            s.send(b'GSO IR\r\n')
+            time.sleep(sleepyTime)
+            rS_IR=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+            splitString=rS_IR.split(',')
+            Controls.IRRead.delete(0,tk.END)
+            Controls.IRRead.insert(1,splitString[1])
 
-        s.send(b'GSO FC\r\n')
-        time.sleep(sleepyTime)
-        rS_FC=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
-        splitString=rS_FC.split(',')
-        Controls.FCRead.delete(0,tk.END)
-        Controls.FCRead.insert(1,splitString[1])
+            s.send(b'GSO TV\r\n')
+            time.sleep(sleepyTime)
+            rS_TV=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
+            splitString=rS_TV.split(',')
+            Controls.TVRead.delete(0,tk.END)
+            Controls.TVRead.insert(1,splitString[1])
 
-        s.send(b'GSO FV\r\n')
-        time.sleep(sleepyTime)
-        rS_FV=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
-        splitString=rS_FV.split(',')
-        Controls.FVRead.delete(0,tk.END)
-        Controls.FVRead.insert(1,splitString[1])
+            s.send(b'GSO FC\r\n')
+            time.sleep(sleepyTime)
+            rS_FC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_FC = rS_FC.replace('\n', ' ').replace('\r', '')
+            splitString=rS_FC.split(',')
+            Controls.FCRead.delete(0,tk.END)
+            Controls.FCRead.insert(1,splitString[1])
 
-        s.send(b'GSO TC\r\n')
-        time.sleep(sleepyTime)
-        rS_TC=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
-        splitString=rS_TC.split(',')
-        Controls.TCRead.delete(0,tk.END)
-        Controls.TCRead.insert(1,splitString[1])         
+            s.send(b'GSO FV\r\n')
+            time.sleep(sleepyTime)
+            rS_FV=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_FV = rS_FV.replace('\n', ' ').replace('\r', '')
+            splitString=rS_FV.split(',')
+            Controls.FVRead.delete(0,tk.END)
+            Controls.FVRead.insert(1,splitString[1])
 
-        s.send(b'GSO EC\r\n')
-        time.sleep(sleepyTime)
-        rS_EC=s.recv(1024).decode("utf-8")
-        time.sleep(sleepyTime)
-        rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
-        splitString=rS_EC.split(',')
-        Controls.ECRead.delete(0,tk.END)
-        Controls.ECRead.insert(1,splitString[1])
-        
-        s.close()
+            s.send(b'GSO TC\r\n')
+            time.sleep(sleepyTime)
+            rS_TC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
+            splitString=rS_TC.split(',')
+            Controls.TCRead.delete(0,tk.END)
+            Controls.TCRead.insert(1,splitString[1])         
 
+            s.send(b'GSO EC\r\n')
+            time.sleep(sleepyTime)
+            rS_EC=s.recv(1024).decode("utf-8")
+            time.sleep(sleepyTime)
+            rS_EC = rS_EC.replace('\n', ' ').replace('\r', '')
+            splitString=rS_EC.split(',')
+            Controls.ECRead.delete(0,tk.END)
+            Controls.ECRead.insert(1,splitString[1])
+            
+            s.close()
 
+        except socket.error as e:
+            print ("Error: ",e)
 
 
         
@@ -666,14 +704,15 @@ class Controls(tk.Frame):
 
     #FRAME FOR SETTINGS (ION ENERGY ETC)
     TopRow=tk.Frame(frame2)
-    lblLbl = tk.Label(TopRow, text="  ",width=10,anchor='w')
+    lblLbl = tk.Label(TopRow, text="  ",width=8,anchor='w')
     lblLbl.pack(side=tk.LEFT)
     lblFrom = tk.Label(TopRow, text="From",width=8,anchor='w')
     lblFrom.pack(side=tk.LEFT)
-    lblTo = tk.Label(TopRow, text="To",width=8,anchor='w')
+    lblTo = tk.Label(TopRow, text=" To",width=6,anchor='w')
     lblTo.pack(side=tk.LEFT)
-    lblRead = tk.Label(TopRow, text="Read",width=8,anchor='w')
+    lblRead = tk.Button(TopRow, text="Read", width=6, command=ReadMassSpec)
     lblRead.pack(side=tk.LEFT)
+    
     TopRow.pack(side=tk.TOP, fill=tk.NONE)
     #Ion Energy
     iEFrame=tk.Frame(frame2)
@@ -736,8 +775,8 @@ class Controls(tk.Frame):
     TVlbl.pack(side=tk.LEFT)
     TVFrom = tk.Entry(TVframe,width=8)
     TVFrom.pack(side="left",padx=5)
-    TVTo = tk.Entry(TVframe,width=8)
-    TVTo.pack(side="left",padx=5)
+    TVTo = tk.Label(TVframe, text="",width=8)
+    TVTo.pack(side="left",padx=0)
     TVRead = tk.Entry(TVframe,width=8)
     TVRead.pack(side="left",padx=5)
     TVframe.pack(side=tk.TOP, fill=tk.NONE)        
@@ -758,8 +797,8 @@ class Controls(tk.Frame):
     FVlbl.pack(side=tk.LEFT)
     FVFrom = tk.Entry(FVframe,width=8)
     FVFrom.pack(side="left",padx=5)
-    FVTo = tk.Entry(FVframe,width=8)
-    FVTo.pack(side="left",padx=5)
+    FVTo = tk.Label(FVframe, text="",width=8)
+    FVTo.pack(side="left",padx=0)
     FVRead = tk.Entry(FVframe,width=8)
     FVRead.pack(side="left",padx=5)
     FVframe.pack(side=tk.TOP, fill=tk.NONE)    
