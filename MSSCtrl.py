@@ -16,6 +16,7 @@ import threading
 matplotlib.use("TkAgg")
 
 N=0
+
 root = tk.Tk()
 
 frame1 = tk.Frame(root, borderwidth=10)
@@ -64,7 +65,7 @@ class GraphFrame(tk.Frame):
         menu.add_cascade(label="Data", menu=data)
         
         settings = tk.Menu(menu)
-        #settings.add_command(label="Acq Time")
+        settings.add_command(label="Load Settings",command=self.LoadSettings)
         aqutime = tk.Menu(settings)
         settings.add_cascade(label="Acq Time", menu=aqutime)
 
@@ -90,38 +91,101 @@ class GraphFrame(tk.Frame):
         ScanOption.add_radiobutton(label='Y-Focus', value=2, variable=scanOp)
         ScanOption.add_radiobutton(label='Y-Bias', value=3, variable=scanOp)
         ScanOption.add_radiobutton(label='Electron Energy', value=4, variable=scanOp)
-        ScanOption.add_radiobutton(label='Ion Repellar', value=5, variable=scanOp)
+        ScanOption.add_radiobutton(label='Ion Repeller', value=5, variable=scanOp)
 
         scanOp.set(1)
 
         menu.add_cascade(label="Settings", menu=settings)
-        
-   #     mb_radmenu = tk.Menu(menu)
-   #     menu.configure(menu=mb_radmenu)
 
-        
-
-        #Check to see if the Mass Spec is attached.
-        #If it isn't, will need to run in offline mode.
-##        print ("Attempting to connect to mass spec")
-##        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-##        s.settimeout(10)
-##        try: 
-##            print (s.recv(1024).decode("utf-8"))
-##            s.connect(('localhost',1090))
-##        except socket.error as e:
-##            print(e)
-##        s.close()
         Controls.ReadMassSpec()
 
            
     def exit(self):
-        print(AqTime.get())
         exit()
 
+    def LoadSettings(self):
+        #Load the settings file
+        root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("dat files","*.dat"),("all files","*.*")))
+
+        try:
+            settings=np.genfromtxt(root.filename,delimiter=',', invalid_raise = False, names=True)
+        except Warning as e:
+           print (e)
+        #Ion Energy
+        dataLine=settings[0]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.iEFrom.delete(0,tk.END)
+        Controls.iEFrom.insert(1,splitString[0])       
+        Controls.iETo.delete(0,tk.END)
+        Controls.iETo.insert(1,splitString[1])       
+        #Y Focus
+        dataLine=settings[1]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.yFFrom.delete(0,tk.END)
+        Controls.yFFrom.insert(1,splitString[0])       
+        Controls.yFTo.delete(0,tk.END)
+        Controls.yFTo.insert(1,splitString[1])       
+        #Y Bias
+        dataLine=settings[2]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.yBFrom.delete(0,tk.END)
+        Controls.yBFrom.insert(1,splitString[0])       
+        Controls.yBTo.delete(0,tk.END)
+        Controls.yBTo.insert(1,splitString[1])      
+        #Electron Energy
+        dataLine=settings[3]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.EEFrom.delete(0,tk.END)
+        Controls.EEFrom.insert(1,splitString[0])       
+        Controls.EETo.delete(0,tk.END)
+        Controls.EETo.insert(1,splitString[1])   
+        #Ion Repeller
+        dataLine=settings[4]
+        print (dataLine)
+        dataString=str(dataLine)
+        print (dataString)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.IRFrom.delete(0,tk.END)
+        Controls.IRFrom.insert(1,splitString[0])       
+        Controls.IRTo.delete(0,tk.END)
+        Controls.IRTo.insert(1,splitString[1])
+        print (len(splitString))
+        
+        #Trap Voltage
+        dataLine=settings[5]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.TVFrom.delete(0,tk.END)
+        Controls.TVFrom.insert(1,splitString[0])       
+
+        #Filament Voltage
+        dataLine=settings[6]
+        print (dataLine)
+        dataString=str(dataLine)
+        SettingsLine=(dataString[1:-1])
+        splitString=SettingsLine.split(',')
+        Controls.FVFrom.delete(0,tk.END)
+        Controls.FVFrom.insert(1,splitString[0])     
+
+        
     def RunScan(self):
 
-        #acqTime=100
+        
         acqTime=AqTime.get()
         acqRestTime=0.2+(acqTime/1000)
         acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
@@ -194,16 +258,16 @@ class GraphFrame(tk.Frame):
         print ("Start Scan")
 
         scans=0
-        total_scans=3
+        total_scans=1
 
         while scans < total_scans:
             SV=1450.000
             TV=1850.000
-            StepSize=2
+            StepSize=1
 
             print ("Initialise Source Voltage")
             s.send(b'SetSourceOutput IE,1450.0000\r\n')
-           # time.sleep(60)
+           
             Dummy=(s.recv(1024).decode("utf-8"))
 
             print ("Scans Number",scans+1)
@@ -212,12 +276,6 @@ class GraphFrame(tk.Frame):
             while SV < TV:
                 print ("Scan Number",scans,"Voltage",SV)
 
-                #Set Source Voltage
-##                BStr=("SetSourceOutput IE,")
-##                CStr=(str(SV)+"\r\n")
-##                AStr=BStr+CStr
-##                s.send(str.encode(AStr))
-                
                 SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
                 s.send(str.encode(SVStr))
 
@@ -579,6 +637,10 @@ class Controls(tk.Frame):
     def callback(*args):
         GraphFrame.UpdatePlot()
 
+    def TestDef():
+        SV=Controls.iEFrom.get()
+        print(SV)
+
     def ReadMassSpec():
         #Read the mass spec
         print ("Reading mass Spec")
@@ -907,7 +969,7 @@ class Controls(tk.Frame):
 
     
 
-    b = tk.Button(CtrlFrame3, text="OK", command=callback)
+    b = tk.Button(CtrlFrame3, text="OK", command=TestDef)
     b.pack()
 
     
