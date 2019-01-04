@@ -10,35 +10,28 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import numpy as np
 from tkinter import filedialog
-import threading
-
 
 matplotlib.use("TkAgg")
 
-N=0
-
 root = tk.Tk()
-
 frame1 = tk.Frame(root, borderwidth=10)
 fig = plt.Figure(figsize=(6,4),dpi=100)
 canvas = FigureCanvasTkAgg(fig, frame1)
-#canvas.get_tk_widget().pack(side="left", fill="x")
 ax = fig.add_subplot(111)
 toolbar = NavigationToolbar2Tk(canvas, frame1)
 toolbar.update()
 frame1.pack(side=tk.LEFT, fill=tk.X)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
-
 frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
 frame2.pack(side=tk.RIGHT, fill=tk.X)
 
+#Enter globals here
+
+N=0
 AqTime = tk.IntVar()
 scanOp = tk.IntVar()
 integrations = tk.IntVar()
 ieStepSize = tk.StringVar()
-
-
-
         
 class GraphFrame(tk.Frame):
 
@@ -50,7 +43,7 @@ class GraphFrame(tk.Frame):
         
     def init_window(self):
         
-        self.master.title("SpecView")
+        self.master.title("Python Mass Spectrometer Controller")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.NONE)
 
@@ -70,10 +63,8 @@ class GraphFrame(tk.Frame):
         settings = tk.Menu(menu)
         settings.add_command(label="Load Settings",command=self.LoadSettings)
         aqutime = tk.Menu(settings)
-        settings.add_cascade(label="Acq Time", menu=aqutime)
+        settings.add_cascade(label="Acquisition Time", menu=aqutime)
 
-        
-        
         aqutime.add_radiobutton(label='100ms', value=100, variable=AqTime)
         aqutime.add_radiobutton(label='200ms', value=200, variable=AqTime)
         aqutime.add_radiobutton(label='300ms', value=300, variable=AqTime)
@@ -115,7 +106,7 @@ class GraphFrame(tk.Frame):
 
 
         ieStepSize_menu= tk.Menu(settings)
-        settings.add_cascade(label="Step Size", menu=ieStepSize_menu)
+        settings.add_cascade(label="IE Step Size", menu=ieStepSize_menu)
 
         ieStepSize_menu.add_radiobutton(label='0.1', value=0.1, variable=ieStepSize)
         ieStepSize_menu.add_radiobutton(label='0.2', value=0.2, variable=ieStepSize)
@@ -126,9 +117,6 @@ class GraphFrame(tk.Frame):
         ieStepSize_menu.add_radiobutton(label='10', value=10, variable=ieStepSize)
         
         ieStepSize.set(0.2)
-
-        
-
 
         menu.add_cascade(label="Settings", menu=settings)
 
@@ -144,11 +132,12 @@ class GraphFrame(tk.Frame):
 
         try:
             settings=np.genfromtxt(root.filename,delimiter=',', invalid_raise = False, names=True)
-        except Warning as e:
+        except filedialog.EXCEPTION as e:
            print (e)
+           return None
+           
         #Ion Energy
         dataLine=settings[0]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
@@ -158,7 +147,6 @@ class GraphFrame(tk.Frame):
         Controls.iETo.insert(1,splitString[1])       
         #Y Focus
         dataLine=settings[1]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
@@ -168,7 +156,6 @@ class GraphFrame(tk.Frame):
         Controls.yFTo.insert(1,splitString[1])       
         #Y Bias
         dataLine=settings[2]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
@@ -178,7 +165,6 @@ class GraphFrame(tk.Frame):
         Controls.yBTo.insert(1,splitString[1])      
         #Electron Energy
         dataLine=settings[3]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
@@ -188,44 +174,47 @@ class GraphFrame(tk.Frame):
         Controls.EETo.insert(1,splitString[1])   
         #Ion Repeller
         dataLine=settings[4]
-        print (dataLine)
         dataString=str(dataLine)
-        print (dataString)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
         Controls.IRFrom.delete(0,tk.END)
         Controls.IRFrom.insert(1,splitString[0])       
         Controls.IRTo.delete(0,tk.END)
         Controls.IRTo.insert(1,splitString[1])
-        print (len(splitString))
-        
         #Trap Voltage
         dataLine=settings[5]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
         Controls.TVFrom.delete(0,tk.END)
         Controls.TVFrom.insert(1,splitString[0])       
-
         #Filament Voltage
         dataLine=settings[6]
-        print (dataLine)
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
         Controls.FVFrom.delete(0,tk.END)
-        Controls.FVFrom.insert(1,splitString[0])     
+        Controls.FVFrom.insert(1,splitString[0])
 
-        
+               
     def RunScan(self):
 
+        #Check that there is a valid IE range
+
+        try:
+            i1=float(Controls.iEFrom.get())
+            i2=float(Controls.iETo.get())
+            if ((i2-i1)==0):
+                print("Zero range")
+                return None
+        except:
+            print("Invalid Range")
+            return None
+            
         
         acqTime=AqTime.get()
         acqRestTime=0.2+(acqTime/1000)
         acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
-
-        print(acqRestTime)
         
         if Controls.FS_checked.get():
             print("Fast Scan")
@@ -238,9 +227,16 @@ class GraphFrame(tk.Frame):
         print ("Connecting to mass spec")
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(10)
-        s.connect(('localhost',1090))
-        print (s.recv(1024).decode("utf-8"))
 
+        try:
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
+        except socket.error as e:
+            print (e)
+            print ("Exiting")
+            return None
+
+        print ("Logging In to Mass Spec...")
         #Login
         s.send(b'login i,pw \r\n')
         time.sleep(0.2)
@@ -295,18 +291,14 @@ class GraphFrame(tk.Frame):
         scans=0
         total_scans=1
 
-
-
         while scans < total_scans:
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
             #SV=1450.000
             #TV=1550.000
-            StepSize=0.5
-
+            StepSize=float(ieStepSize.get())
 
             print ("Scan Number",scans+1)
-            
 
             while SV < TV:
                 print ("Scan Number",scans,"Voltage",SV)
@@ -318,16 +310,20 @@ class GraphFrame(tk.Frame):
                 IEreturn=(s.recv(1024))
                 time.sleep(0.1)
                 
+                #Get Number of Integrations
+                AquIntTimeInt=integrations.get()
                 #Acquire Data - wait for enough time for the buffer to fill....
-
-### Add in integrations here, but need to check how aquisition time works!
+                AcqCommandToSend=('StartAcq '+ str(AquIntTimeInt)+',JS\r\n')
+                s.send(str.encode(AcqCommandToSend))        
                 
-                s.send(b'StartAcq 1,JS\r\n')
-                time.sleep(acqRestTime)
+                #s.send(b'StartAcq 1,JS\r\n')
+                time.sleep(AquIntTimeInt*acqRestTime)
                 returnString=s.recv(1024)
                 time.sleep(0.1)
 
                 #Get the Isotopx voltages (unless running a fast scan)
+                #If running a fast scan, then the settings from the settings
+                #box on the GUI can go in the first column
                 if FastScan:
                     rS_IE=("0,0")
                     rS_YF=("0,0")
@@ -677,10 +673,9 @@ class Controls(tk.Frame):
 
     def TestDef():
 
-        print (ieStepSize.get())
-
         
-
+        TV=float(Controls.iETo.get())
+        print (TV)
         
 
     def ReadMassSpec():
@@ -714,8 +709,9 @@ class Controls(tk.Frame):
             splitString=rS_IE.split(',')
             Controls.iERead.delete(0,tk.END)
             Controls.iERead.insert(1,splitString[1])
-
-            
+            Controls.iEFrom.delete(0,tk.END)
+            Controls.iEFrom.insert(1,splitString[0])   
+                
             s.send(b'GSO YF\r\n')
             time.sleep(sleepyTime)
             rS_YF=s.recv(1024).decode("utf-8")
@@ -724,6 +720,8 @@ class Controls(tk.Frame):
             splitString=rS_YF.split(',')
             Controls.yFRead.delete(0,tk.END)
             Controls.yFRead.insert(1,splitString[1])
+            Controls.yFFrom.delete(0,tk.END)
+            Controls.yFFrom.insert(1,splitString[0])  
 
             s.send(b'GSO YB\r\n')
             time.sleep(sleepyTime)
@@ -733,7 +731,9 @@ class Controls(tk.Frame):
             splitString=rS_YB.split(',')
             Controls.yBRead.delete(0,tk.END)
             Controls.yBRead.insert(1,splitString[1])      
-
+            Controls.yBFrom.delete(0,tk.END)
+            Controls.yBFrom.insert(1,splitString[0])
+            
             s.send(b'GSO EE\r\n')
             time.sleep(sleepyTime)
             rS_EE=s.recv(1024).decode("utf-8")
@@ -741,7 +741,9 @@ class Controls(tk.Frame):
             rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
             splitString=rS_EE.split(',')
             Controls.EERead.delete(0,tk.END)
-            Controls.EERead.insert(1,splitString[1])        
+            Controls.EERead.insert(1,splitString[1])
+            Controls.EEFrom.delete(0,tk.END)
+            Controls.EEFrom.insert(1,splitString[0])   
 
             s.send(b'GSO IR\r\n')
             time.sleep(sleepyTime)
@@ -751,7 +753,9 @@ class Controls(tk.Frame):
             splitString=rS_IR.split(',')
             Controls.IRRead.delete(0,tk.END)
             Controls.IRRead.insert(1,splitString[1])
-
+            Controls.IRFrom.delete(0,tk.END)
+            Controls.IRFrom.insert(1,splitString[0])
+            
             s.send(b'GSO TV\r\n')
             time.sleep(sleepyTime)
             rS_TV=s.recv(1024).decode("utf-8")
@@ -760,7 +764,9 @@ class Controls(tk.Frame):
             splitString=rS_TV.split(',')
             Controls.TVRead.delete(0,tk.END)
             Controls.TVRead.insert(1,splitString[1])
-
+            Controls.TVFrom.delete(0,tk.END)
+            Controls.TVFrom.insert(1,splitString[0])
+            
             s.send(b'GSO FC\r\n')
             time.sleep(sleepyTime)
             rS_FC=s.recv(1024).decode("utf-8")
@@ -778,6 +784,8 @@ class Controls(tk.Frame):
             splitString=rS_FV.split(',')
             Controls.FVRead.delete(0,tk.END)
             Controls.FVRead.insert(1,splitString[1])
+            Controls.FVFrom.delete(0,tk.END)
+            Controls.FVFrom.insert(1,splitString[0])
 
             s.send(b'GSO TC\r\n')
             time.sleep(sleepyTime)
@@ -786,7 +794,7 @@ class Controls(tk.Frame):
             rS_TC = rS_TC.replace('\n', ' ').replace('\r', '')
             splitString=rS_TC.split(',')
             Controls.TCRead.delete(0,tk.END)
-            Controls.TCRead.insert(1,splitString[1])         
+            Controls.TCRead.insert(1,splitString[1])
 
             s.send(b'GSO EC\r\n')
             time.sleep(sleepyTime)
@@ -801,26 +809,31 @@ class Controls(tk.Frame):
 
         except socket.error as e:
             print ("Error: ",e)
+            
 
 
-        
+    def SetMassSpec():
+        #Set variables
+        print ("")
 
 
     #FRAME FOR SETTINGS (ION ENERGY ETC)
     TopRow=tk.Frame(frame2)
-    lblLbl = tk.Label(TopRow, text="  ",width=8,anchor='w')
+    lblLbl = tk.Label(TopRow, text="  ",width=6,anchor='w')
     lblLbl.pack(side=tk.LEFT)
-    lblFrom = tk.Label(TopRow, text="From",width=8,anchor='w')
+    lblFrom = tk.Label(TopRow, text="From",width=4,anchor='w')
     lblFrom.pack(side=tk.LEFT)
-    lblTo = tk.Label(TopRow, text=" To",width=6,anchor='w')
+    lblSet = tk.Button(TopRow, text="Set", width=6, command=SetMassSpec)
+    lblSet.pack(side=tk.LEFT)
+    lblTo = tk.Label(TopRow, text=" To",width=4,anchor='w')
     lblTo.pack(side=tk.LEFT)
-    lblRead = tk.Button(TopRow, text="Read", width=6, command=ReadMassSpec)
+    lblRead = tk.Button(TopRow, text="Read", width=5, command=ReadMassSpec)
     lblRead.pack(side=tk.LEFT)
     
     TopRow.pack(side=tk.TOP, fill=tk.NONE)
     #Ion Energy
     iEFrame=tk.Frame(frame2)
-    iElbl = tk.Label(iEFrame, text="iE",width=5,anchor='w')
+    iElbl = tk.Label(iEFrame, text="IE",width=5,anchor='w')
     iElbl.pack(side=tk.LEFT)
     iEFrom = tk.Entry(iEFrame,width=8)
     iEFrom.pack(side="left",padx=5)
@@ -933,10 +946,7 @@ class Controls(tk.Frame):
     CHlbl = tk.Label(CHframe, text="Channels",width=20)
     CHlbl.pack(side=tk.LEFT)
     CHframe.pack(side=tk.TOP, fill=tk.NONE)     
-
- 
-
-    
+   
     CtrlFrame1= tk.Frame(frame2)
     CtrlFrame2= tk.Frame(frame2)
     CtrlFrame3= tk.Frame(frame2)   
@@ -1011,17 +1021,12 @@ class Controls(tk.Frame):
 
     
 
-    b = tk.Button(CtrlFrame3, text="OK", command=TestDef)
+    b = tk.Button(CtrlFrame3, text="TEST", command=TestDef)
     b.pack()
 
-    
-
-    
     CtrlFrame1.pack(side=tk.TOP, fill=tk.NONE,pady=3)
     CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE,pady=3)
     CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE,pady=5)
-    
-
         
 # root window created. Here, that would be the only window, but
 # you can later have windows within windows.
