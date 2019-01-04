@@ -34,6 +34,9 @@ frame2.pack(side=tk.RIGHT, fill=tk.X)
 
 AqTime = tk.IntVar()
 scanOp = tk.IntVar()
+integrations = tk.IntVar()
+ieStepSize = tk.StringVar()
+
 
 
         
@@ -94,6 +97,38 @@ class GraphFrame(tk.Frame):
         ScanOption.add_radiobutton(label='Ion Repeller', value=5, variable=scanOp)
 
         scanOp.set(1)
+        Integrations= tk.Menu(settings)
+        settings.add_cascade(label="Integrations", menu=Integrations)
+
+        Integrations.add_radiobutton(label='1', value=1, variable=integrations)
+        Integrations.add_radiobutton(label='2', value=2, variable=integrations)
+        Integrations.add_radiobutton(label='3', value=3, variable=integrations)
+        Integrations.add_radiobutton(label='4', value=4, variable=integrations)
+        Integrations.add_radiobutton(label='5', value=5, variable=integrations)
+        Integrations.add_radiobutton(label='6', value=6, variable=integrations)
+        Integrations.add_radiobutton(label='7', value=7, variable=integrations)
+        Integrations.add_radiobutton(label='8', value=8, variable=integrations)
+        Integrations.add_radiobutton(label='9', value=9, variable=integrations)
+        Integrations.add_radiobutton(label='10', value=10, variable=integrations)
+
+        integrations.set(1)
+
+
+        ieStepSize_menu= tk.Menu(settings)
+        settings.add_cascade(label="Step Size", menu=ieStepSize_menu)
+
+        ieStepSize_menu.add_radiobutton(label='0.1', value=0.1, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='0.2', value=0.2, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='0.5', value=0.5, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='1', value=1, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='2', value=2, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='5', value=5, variable=ieStepSize)
+        ieStepSize_menu.add_radiobutton(label='10', value=10, variable=ieStepSize)
+        
+        ieStepSize.set(0.2)
+
+        
+
 
         menu.add_cascade(label="Settings", menu=settings)
 
@@ -260,6 +295,8 @@ class GraphFrame(tk.Frame):
         scans=0
         total_scans=1
 
+
+
         while scans < total_scans:
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
@@ -267,10 +304,6 @@ class GraphFrame(tk.Frame):
             #TV=1550.000
             StepSize=0.5
 
-            #print ("Initialise Source Voltage")
-            #s.send(b'SetSourceOutput IE,1450.0000\r\n')
-           
-            #Dummy=(s.recv(1024).decode("utf-8"))
 
             print ("Scan Number",scans+1)
             
@@ -285,7 +318,10 @@ class GraphFrame(tk.Frame):
                 IEreturn=(s.recv(1024))
                 time.sleep(0.1)
                 
-                #Acquire Data - waitfor enough time for the buffer to fill....
+                #Acquire Data - wait for enough time for the buffer to fill....
+
+### Add in integrations here, but need to check how aquisition time works!
+                
                 s.send(b'StartAcq 1,JS\r\n')
                 time.sleep(acqRestTime)
                 returnString=s.recv(1024)
@@ -640,11 +676,9 @@ class Controls(tk.Frame):
         GraphFrame.UpdatePlot()
 
     def TestDef():
-        SV=float(Controls.iEFrom.get())
-        print(SV)
-        print (type(SV))
 
-        
+        print (ieStepSize.get())
+
         
 
         
