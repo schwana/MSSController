@@ -330,10 +330,11 @@ class GraphFrame(tk.Frame):
                 #Acquire Data - wait for enough time for the buffer to fill....
                 AcqCommandToSend=('StartAcq '+ str(AquIntTimeInt)+',JS\r\n')
                 s.send(str.encode(AcqCommandToSend))        
-                
+                print('Sleep for '+str(1+(AquIntTimeInt*acqRestTime)))
                 #s.send(b'StartAcq 1,JS\r\n')
-                time.sleep(AquIntTimeInt*acqRestTime)
+                time.sleep((AquIntTimeInt*acqRestTime))
                 returnString=s.recv(1024)
+                print(returnString)
                 time.sleep(0.1)
 
                 #Get the Isotopx voltages (unless running a fast scan)
@@ -341,13 +342,13 @@ class GraphFrame(tk.Frame):
                 #box on the GUI can go in the first column
                 if FastScan:
                     rS_IE=(str(SV)+",0")
-                    rS_YF=(str(YF)+",0")
-                    rS_YB=(str(YB)+",0")
-                    rS_EE=(str(EE)+",0")
-                    rS_IR=(str(IR)+",0")
-                    rS_TV=(str(TV)+",0")
+                    rS_YF=(str(fltYF)+",0")
+                    rS_YB=(str(fltYB)+",0")
+                    rS_EE=(str(fltEE)+",0")
+                    rS_IR=(str(fltIR)+",0")
+                    rS_TV=(str(fltTV)+",0")
                     rS_FC=("0,0")
-                    rS_FV=(str(FV)+",0")
+                    rS_FV=(str(fltFV)+",0")
                     rS_TC=("0,0")
                     rS_EC=("0,0")
                 else:
