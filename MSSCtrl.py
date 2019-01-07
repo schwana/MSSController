@@ -302,19 +302,6 @@ class GraphFrame(tk.Frame):
         total_scans=1
 
         while scans < total_scans:
-            #Reset Arrays
-            iE.clear()
-            L5.clear()
-            L4.clear()
-            L3.clear()
-            L2.clear()
-            L1.clear()
-            Ax.clear()
-            H1.clear()
-            H2.clear()
-            H3.clear()
-            H4.clear()
-            rS_.clear()
             
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
@@ -586,10 +573,27 @@ class GraphFrame(tk.Frame):
 
             s.send(b'SetSourceOutput IE,1450.0000\r\n')
             time.sleep(0.2)
-            print (s.recv(1024))    
+            print (s.recv(1024))
+            self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)          
+
+
+
+            #Reset Arrays
+            iE.clear()
+            L5.clear()
+            L4.clear()
+            L3.clear()
+            L2.clear()
+            L1.clear()
+            Ax.clear()
+            H1.clear()
+            H2.clear()
+            H3.clear()
+            H4.clear()
+            rS_.clear()
             
 
-            self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)
+
             scans=scans+1     
 
         s.close()
