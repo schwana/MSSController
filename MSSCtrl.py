@@ -221,9 +221,7 @@ class GraphFrame(tk.Frame):
             return None
             
         
-        acqTime=AqTime.get()
-        acqRestTime=0.2+(acqTime/1000)
-        acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
+
         
         if Controls.FS_checked.get():
             print("Fast Scan")
@@ -255,18 +253,19 @@ class GraphFrame(tk.Frame):
         time.sleep(0.2)
         print ("Version"+s.recv(1024).decode("utf-8"))
 
-        #Set Initial Source Voltage
-        print ("Initialise Source Voltage")
-        s.send(b'SetSourceOutput IE,1300.0000\r\n')
-        time.sleep(0.2)
-        Dummy=(s.recv(1024).decode("utf-8"))
+##        #Set Initial Source Voltage
+##        print ("Initialise Source Voltage")
+##        s.send(b'SetSourceOutput IE,1300.0000\r\n')
+##        time.sleep(0.2)
+##        Dummy=(s.recv(1024).decode("utf-8"))
+
+        #Set the aquisition period and rest time (one integration)
+        acqTime=AqTime.get()
+        acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
         s.send(str.encode(acqAStr))
         time.sleep(0.2)
-        
-        #s.send(b'SetAcqPeriod 100\r\n')
-        
         Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
-
+        acqRestTime=0.2+(acqTime/1000)
         #print (Dummy)
         
         #Scan across peak
@@ -295,12 +294,28 @@ class GraphFrame(tk.Frame):
         global H3
         global H4
         global N
+
+        
         print ("Start Scan")
 
         scans=0
         total_scans=1
 
         while scans < total_scans:
+            #Reset Arrays
+            iE.clear()
+            L5.clear()
+            L4.clear()
+            L3.clear()
+            L2.clear()
+            L1.clear()
+            Ax.clear()
+            H1.clear()
+            H2.clear()
+            H3.clear()
+            H4.clear()
+            rS_.clear()
+            
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
             StepSize=float(ieStepSize.get())
@@ -575,24 +590,6 @@ class GraphFrame(tk.Frame):
             
 
             self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)
-
-            
-
-            #Reset all the arrays
-
-            iE.clear()
-            L5.clear()
-            L4.clear()
-            L3.clear()
-            L2.clear()
-            L1.clear()
-            Ax.clear()
-            H1.clear()
-            H2.clear()
-            H3.clear()
-            H4.clear()
-            rS_.clear()
-            
             scans=scans+1     
 
         s.close()
