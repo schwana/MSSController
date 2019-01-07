@@ -443,6 +443,7 @@ class GraphFrame(tk.Frame):
                 print (len(tempStr))
                 temp_i=1
                 data_N=1
+                running_total=[]
                 while (temp_i<len(tempStr)):
                     print (temp_i,tempStr[temp_i])
                     tempStr2=tempStr[temp_i].split(',')
@@ -457,13 +458,27 @@ class GraphFrame(tk.Frame):
                     i_datastart=5
                     
                     while (i_datastart<16):
-                        
-
+                        running_total[i_datastart]=float(tempStr2[i_datastart])+running_total[i_datastart]
                         
                         i_datastart=i_datastart+1
+
+
+
                     data_N=data_N+1
                     temp_i=temp_i+2
 
+                i_datastart=5
+                Average_String=""
+                
+                while (i_datastart<16):
+                    running_total[i_datastart]=running_total[i_datastart]/data_N
+                    Average_String=(str(running_total[i_datastart])+',')
+                    
+                    
+                    i_datastart=i_datastart+1
+
+                spec= (StringStart+Average_String)
+                
                 
 
                 ####
