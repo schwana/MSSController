@@ -434,17 +434,26 @@ class GraphFrame(tk.Frame):
                             rS_FV+ "," +
                             rS_TC+ "," +
                             rS_EC+ ",")
-                ####
-                ## Insert a loop here containing number of integrations
-                ## which can separate the string. It can produce the data
-                ## output required for rS_, iE_ etc below
-
-                
+               
 
                 #Separate the string
                 spec=(returnString.decode("utf-8"))
 
                 print (spec)
+
+                ####
+                ## Insert a loop here containing number of integrations
+                ## which can separate the string. It can produce the data
+                ## output required for rS_, iE_ etc below
+                ## The output of spec will be:
+                ## Line 1: E00
+                ## Line 2: Data for N=1
+                ## Line 3: Data for N=2
+                ## etc
+
+                     ## Simplest method is to take these lines, average
+                     ## and produce a second "spec" to feed into rS below
+
                 
                 rS=(str(SV)+","+spec)
                 rS=rS[0:-5]
