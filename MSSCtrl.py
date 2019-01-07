@@ -335,8 +335,8 @@ class GraphFrame(tk.Frame):
                 s.send(str.encode(AcqCommandToSend))
                 
                 #s.send(b'StartAcq 1,JS\r\n')
-                time.sleep((AquIntTimeInt*acqRestTime))
-                returnString=s.recv(1024)
+                time.sleep((1*AquIntTimeInt*acqRestTime))
+                returnString=s.recv(4096)
                 time.sleep(0.1)
 
                 #Get the Isotopx voltages (unless running a fast scan)
@@ -437,6 +437,7 @@ class GraphFrame(tk.Frame):
 
                 #Separate the string
                 spec=(returnString.decode("utf-8"))
+                #print(spec)
 
                 
                 tempStr=spec.split('#')
@@ -449,21 +450,23 @@ class GraphFrame(tk.Frame):
                     
 
                     SpecIntegration.append(tempStr[temp_i])
-                    StringStart=(tempStr2[0]+','+
-                                 tempStr2[1]+','+
-                                 tempStr2[2]+','+
-                                 tempStr2[3]+','+
-                                 tempStr2[4]+',')
+
 
                     data_N=data_N+1
                     temp_i=temp_i+2
 
-                print('Number of Int=',len(SpecIntegration))
 
-                #spec = SpecIntegration[len(SpecIntegration)-1]
                 
-                  
                 
+                tempStr2=tempStr[1].split(',')
+
+                StringStart=(tempStr2[0]+','+
+                             tempStr2[1]+','+
+                             tempStr2[2]+','+
+                             tempStr2[3]+','+
+                             tempStr2[4]+',')
+                
+                print('Number of Int=',len(SpecIntegration))
 
                 ####
                 ## Insert a loop here containing number of integrations
@@ -478,41 +481,55 @@ class GraphFrame(tk.Frame):
                      ## Simplest method is to take these lines, average
                      ## and produce a second "spec" to feed into rS below
 
-                data_N=0
-                temp_i=5
+                
+                temp_col=5
                 averagedData=[]
 
-                while (temp_i<15):
-                    running=0
+                #print ('XXXXXXXXXXXXXXXXX')
+
+                while (temp_col<16):
+                    running=0.0
+                    data_N=0
+                    
                     
                     while (data_N<len(SpecIntegration)):
-
+                        #print('data_N',data_N)
+                        #print ('SpecIntegration ', SpecIntegration[data_N])
                         dummyString=SpecIntegration[data_N].split(',')
-
-                        running=running+dummyString[temp_i]
-                       
+                        #print (temp_i,float(dummyString[temp_col]))
+                        running=running+float(dummyString[temp_col])
+                        
                         data_N=data_N+1
-
+                    
                     running=running/len(SpecIntegration)
-
                     averagedData.append(running)
+                    temp_col=temp_col+1
+                    #print ('Column Increment',temp_col)
 
-                    temp_i=temp_i+1    
+
+
 
                 temp_i=0
                 EndString=""
-                while (temp_i<len(averagedData):
+                while (temp_i<len(averagedData)):
 
-                       EndString=(EndString+averagedData[temp_i]+',')
+                       EndString=(EndString+str(averagedData[temp_i])+',')
 
     
                        temp_i=temp_i+1
 
+                EndString=EndString[:-1]
+
+
+
+                spec2='#'+StringStart+EndString+'#'
                 
-                spec=StringStart+EndString
+
                 
-                rS=(str(SV)+","+spec)
-                rS=rS[0:-5]
+                rS=(str(SV)+","+spec2)
+                print(rS)
+                rS=rS[0:-1]
+                print(rS)
                 spectrum=rS.split(',')
 
                 #print (spectrum)
@@ -527,8 +544,8 @@ class GraphFrame(tk.Frame):
                 Ax_.append(float(spectrum[13]))
                 H1_.append(float(spectrum[14]))
                 H2_.append(float(spectrum[15]))
-                H3_.append(float(spectrum[16]))
-                H4_.append(float(spectrum[16]))
+                H3_.append(float(spectrum[15]))
+                H4_.append(float(spectrum[15]))
          
                 iE=iE_
                 L5=L5_
