@@ -337,7 +337,6 @@ class GraphFrame(tk.Frame):
                 #s.send(b'StartAcq 1,JS\r\n')
                 time.sleep((AquIntTimeInt*acqRestTime))
                 returnString=s.recv(1024)
-                print(returnString)
                 time.sleep(0.1)
 
                 #Get the Isotopx voltages (unless running a fast scan)
@@ -440,6 +439,32 @@ class GraphFrame(tk.Frame):
                 spec=(returnString.decode("utf-8"))
 
                 print (spec)
+                tempStr=spec.split('#')
+                print (len(tempStr))
+                temp_i=1
+                data_N=1
+                while (temp_i<len(tempStr)):
+                    print (temp_i,tempStr[temp_i])
+                    tempStr2=tempStr[temp_i].split(',')
+                    StringStart=(tempStr2[0]+','+
+                                 tempStr2[1]+','+
+                                 tempStr2[2]+','+
+                                 tempStr2[3]+','+
+                                 tempStr2[4]+',')
+                    print(StringStart)
+                    print('tempStr2 length: ',len(tempStr2))
+
+                    i_datastart=5
+                    
+                    while (i_datastart<16):
+                        
+
+                        
+                        i_datastart=i_datastart+1
+                    data_N=data_N+1
+                    temp_i=temp_i+2
+
+                
 
                 ####
                 ## Insert a loop here containing number of integrations
