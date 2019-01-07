@@ -18,12 +18,17 @@ frame1 = tk.Frame(root, borderwidth=10)
 fig = plt.Figure(figsize=(6,4),dpi=100)
 canvas = FigureCanvasTkAgg(fig, frame1)
 ax = fig.add_subplot(111)
+frame3 = tk.Frame(root, borderwidth=10)
+frame3.pack(side=tk.TOP, fill=tk.BOTH)
 toolbar = NavigationToolbar2Tk(canvas, frame1)
 toolbar.update()
 frame1.pack(side=tk.LEFT, fill=tk.X)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
 frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
 frame2.pack(side=tk.RIGHT, fill=tk.X)
+
+
+
 
 #Enter globals here
 
@@ -298,8 +303,6 @@ class GraphFrame(tk.Frame):
         while scans < total_scans:
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
-            #SV=1450.000
-            #TV=1550.000
             StepSize=float(ieStepSize.get())
 
             print ("Scan Number",scans+1)
@@ -329,8 +332,8 @@ class GraphFrame(tk.Frame):
                 AquIntTimeInt=integrations.get()
                 #Acquire Data - wait for enough time for the buffer to fill....
                 AcqCommandToSend=('StartAcq '+ str(AquIntTimeInt)+',JS\r\n')
-                s.send(str.encode(AcqCommandToSend))        
-                print('Sleep for '+str(1+(AquIntTimeInt*acqRestTime)))
+                s.send(str.encode(AcqCommandToSend))
+                
                 #s.send(b'StartAcq 1,JS\r\n')
                 time.sleep((AquIntTimeInt*acqRestTime))
                 returnString=s.recv(1024)
@@ -431,9 +434,18 @@ class GraphFrame(tk.Frame):
                             rS_FV+ "," +
                             rS_TC+ "," +
                             rS_EC+ ",")
+                ####
+                ## Insert a loop here containing number of integrations
+                ## which can separate the string. It can produce the data
+                ## output required for rS_, iE_ etc below
+
+                
 
                 #Separate the string
                 spec=(returnString.decode("utf-8"))
+
+                print (spec)
+                
                 rS=(str(SV)+","+spec)
                 rS=rS[0:-5]
                 spectrum=rS.split(',')
@@ -694,11 +706,19 @@ class Controls(tk.Frame):
     def TestDef():
         TV=float(Controls.iETo.get())
         print (TV)
+
+
+    def StatusUpdate(StatusText):
+        #Update the status bar with any messages
+        Controls.StatusLbl.config(text=StatusText)
+        
         
     def ReadMassSpec():
         #Read the mass spec
         print ("Reading mass Spec")
         print ("Connecting to mass spec")
+        
+        
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(10)
         try:
@@ -709,9 +729,11 @@ class Controls(tk.Frame):
 
         except socket.error as e:
             print ("Error: ",e)
+            Controls.StatusUpdate("Offline")
             return None
             
         #Login
+        Controls.StatusUpdate("Logging In")
         s.send(b'login i,pw \r\n')
         time.sleep(0.2)
         print (s.recv(1024).decode("utf-8"))
@@ -825,6 +847,8 @@ class Controls(tk.Frame):
         splitString=rS_EC.split(',')
         Controls.ECRead.delete(0,tk.END)
         Controls.ECRead.insert(1,splitString[1])
+
+        Controls.StatusUpdate("Voltages Read")
         
         s.close()
 
@@ -832,6 +856,7 @@ class Controls(tk.Frame):
         #Read the mass spec
         print ("Sending settings to mass Spec")
         print ("Connecting to mass spec")
+        Controls.StatusUpdate("Connecting to Mass Spec")
         s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(10)
         try:
@@ -841,10 +866,12 @@ class Controls(tk.Frame):
             print (s.recv(1024).decode("utf-8"))
 
         except socket.error as e:
+            Controls.StatusUpdate("Offline")
             print ("Error: ",e)
             return None
             
         #Login
+        Controls.StatusUpdate("Logging In")
         s.send(b'login i,pw \r\n')
         time.sleep(0.2)
         print (s.recv(1024).decode("utf-8"))
@@ -861,51 +888,53 @@ class Controls(tk.Frame):
         s.send(str.encode(SVStr))
         Dummy= ("Source Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)
+        time.sleep(0.5)
         #Y Focus
         YF=float(Controls.yFFrom.get())
         YFStr=("SetSourceOutput YF,"+str(YF)+"\r\n")
         s.send(str.encode(YFStr))
         Dummy= ("Y-Focus: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)
+        time.sleep(0.5)
         #Y Bias
         YB=float(Controls.yBFrom.get())
         YBStr=("SetSourceOutput YB,"+str(YB)+"\r\n")
         s.send(str.encode(YBStr))
         Dummy= ("Y-Bias: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)       
+        time.sleep(0.5)       
         #Electron Energy
         EE=float(Controls.EEFrom.get())
         EEStr=("SetSourceOutput EE,"+str(EE)+"\r\n")
         s.send(str.encode(EEStr))
         Dummy= ("Electron Energy: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)  
+        time.sleep(0.5)  
         #Ion Repeller
         IR=float(Controls.IRFrom.get())
         IRStr=("SetSourceOutput IR,"+str(IR)+"\r\n")
         s.send(str.encode(IRStr))
         Dummy= ("Ion Repeller: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)  
+        time.sleep(0.5)  
         #Trap Voltage
         TV=float(Controls.TVFrom.get())
         TVStr=("SetSourceOutput TV,"+str(TV)+"\r\n")
         s.send(str.encode(TVStr))
         Dummy= ("Trap Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)
+        time.sleep(0.5)
         #Trap Voltage
         FV=float(Controls.FVFrom.get())
         FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
         s.send(str.encode(FVStr))
         Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(1)
+        time.sleep(0.5)
 
+        Controls.StatusUpdate("Commands Sent")
 
+        s.close()
         
 
     #FRAME FOR SETTINGS (ION ENERGY ETC)
@@ -1110,7 +1139,8 @@ class Controls(tk.Frame):
     c10.pack(side="left", fill="both")
     c11.pack(side="right", fill="both")
 
-    
+    StatusLbl = tk.Label(frame3, text="Status",width=400)
+    StatusLbl.pack(side=tk.LEFT)    
 
     b = tk.Button(CtrlFrame3, text="TEST", command=TestDef)
     b.pack()
