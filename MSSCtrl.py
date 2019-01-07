@@ -696,7 +696,7 @@ class GraphFrame(tk.Frame):
         FileName = 'Scan'+ScanNum+'.dat'
 
         #Read Inlet Line
-        rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read)')
+        rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read),')
         foInitial = open(FileName,"a")
         foInitial.write("iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,"+rS_top+"\n")
 
