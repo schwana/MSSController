@@ -854,12 +854,58 @@ class Controls(tk.Frame):
 
 
         #Set variables
+        #Ion Energy
         SV=float(Controls.iEFrom.get())
         SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
         s.send(str.encode(SVStr))
         Dummy= ("Source Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)
+        #Y Focus
+        YF=float(Controls.yFFrom.get())
+        YFStr=("SetSourceOutput YF,"+str(YF)+"\r\n")
+        s.send(str.encode(YFStr))
+        Dummy= ("Y-Focus: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)
+        #Y Bias
+        YB=float(Controls.yBFrom.get())
+        YBStr=("SetSourceOutput YB,"+str(YB)+"\r\n")
+        s.send(str.encode(YBStr))
+        Dummy= ("Y-Bias: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)       
+        #Electron Energy
+        EE=float(Controls.EEFrom.get())
+        EEStr=("SetSourceOutput EE,"+str(EE)+"\r\n")
+        s.send(str.encode(EEStr))
+        Dummy= ("Electron Energy: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)  
+        #Ion Repeller
+        IR=float(Controls.IRFrom.get())
+        IRStr=("SetSourceOutput IR,"+str(IR)+"\r\n")
+        s.send(str.encode(IRStr))
+        Dummy= ("Ion Repeller: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)  
+        #Trap Voltage
+        TV=float(Controls.TVFrom.get())
+        TVStr=("SetSourceOutput TV,"+str(TV)+"\r\n")
+        s.send(str.encode(TVStr))
+        Dummy= ("Trap Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        time.sleep(1)
+        #Trap Voltage
+        FV=float(Controls.FVFrom.get())
+        FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
+        s.send(str.encode(FVStr))
+        Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
         time.sleep(1)
 
+
+        
 
     #FRAME FOR SETTINGS (ION ENERGY ETC)
     TopRow=tk.Frame(frame2)
