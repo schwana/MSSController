@@ -444,17 +444,23 @@ class GraphFrame(tk.Frame):
                 temp_i=1
                 data_N=0
                 SpecIntegration=[]
+                StringStart=""
                 while (temp_i<len(tempStr)):
                     
 
                     SpecIntegration.append(tempStr[temp_i])
+                    StringStart=(tempStr2[0]+','+
+                                 tempStr2[1]+','+
+                                 tempStr2[2]+','+
+                                 tempStr2[3]+','+
+                                 tempStr2[4]+',')
 
                     data_N=data_N+1
                     temp_i=temp_i+2
 
                 print('Number of Int=',len(SpecIntegration))
 
-                spec = SpecIntegration[len(SpecIntegration)-1]
+                #spec = SpecIntegration[len(SpecIntegration)-1]
                 
                   
                 
@@ -472,6 +478,38 @@ class GraphFrame(tk.Frame):
                      ## Simplest method is to take these lines, average
                      ## and produce a second "spec" to feed into rS below
 
+                data_N=0
+                temp_i=5
+                averagedData=[]
+
+                while (temp_i<15):
+                    running=0
+                    
+                    while (data_N<len(SpecIntegration)):
+
+                        dummyString=SpecIntegration[data_N].split(',')
+
+                        running=running+dummyString[temp_i]
+                       
+                        data_N=data_N+1
+
+                    running=running/len(SpecIntegration)
+
+                    averagedData.append(running)
+
+                    temp_i=temp_i+1    
+
+                temp_i=0
+                EndString=""
+                while (temp_i<len(averagedData):
+
+                       EndString=(EndString+averagedData[temp_i]+',')
+
+    
+                       temp_i=temp_i+1
+
+                
+                spec=StringStart+EndString
                 
                 rS=(str(SV)+","+spec)
                 rS=rS[0:-5]
