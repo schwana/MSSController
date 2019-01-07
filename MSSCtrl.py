@@ -438,47 +438,25 @@ class GraphFrame(tk.Frame):
                 #Separate the string
                 spec=(returnString.decode("utf-8"))
 
-                print (spec)
+                
                 tempStr=spec.split('#')
-                print (len(tempStr))
+                
                 temp_i=1
-                data_N=1
-                running_total=[]
+                data_N=0
+                SpecIntegration=[]
                 while (temp_i<len(tempStr)):
-                    print (temp_i,tempStr[temp_i])
-                    tempStr2=tempStr[temp_i].split(',')
-                    StringStart=(tempStr2[0]+','+
-                                 tempStr2[1]+','+
-                                 tempStr2[2]+','+
-                                 tempStr2[3]+','+
-                                 tempStr2[4]+',')
-                    print(StringStart)
-                    print('tempStr2 length: ',len(tempStr2))
-
-                    i_datastart=5
                     
-                    while (i_datastart<16):
-                        running_total[i_datastart]=float(tempStr2[i_datastart])+running_total[i_datastart]
-                        
-                        i_datastart=i_datastart+1
 
-
+                    SpecIntegration.append(tempStr[temp_i])
 
                     data_N=data_N+1
                     temp_i=temp_i+2
 
-                i_datastart=5
-                Average_String=""
-                
-                while (i_datastart<16):
-                    running_total[i_datastart]=running_total[i_datastart]/data_N
-                    Average_String=(str(running_total[i_datastart])+',')
-                    
-                    
-                    i_datastart=i_datastart+1
+                print('Number of Int=',len(SpecIntegration))
 
-                spec= (StringStart+Average_String)
+                spec = SpecIntegration[len(SpecIntegration)-1]
                 
+                  
                 
 
                 ####
