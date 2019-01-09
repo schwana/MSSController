@@ -56,7 +56,7 @@ class GraphFrame(tk.Frame):
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.NONE)
 
-        # creating a menu instance
+        #Create the menus
         menu = tk.Menu(self.master)
         self.master.config(menu=menu)
 
@@ -97,6 +97,7 @@ class GraphFrame(tk.Frame):
         ScanOption.add_radiobutton(label='Ion Repeller', value=5, variable=scanOp)
 
         scanOp.set(1)
+        
         Integrations= tk.Menu(settings)
         settings.add_cascade(label="Integrations", menu=Integrations)
 
@@ -129,6 +130,7 @@ class GraphFrame(tk.Frame):
 
         menu.add_cascade(label="Settings", menu=settings)
 
+        #Read the Mass Spec and update the "Read" column
         Controls.ReadMassSpec()
 
            
@@ -136,7 +138,7 @@ class GraphFrame(tk.Frame):
         exit()
 
     def LoadSettings(self):
-        #Load the settings file
+        #Load the settings from file
         root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("dat files","*.dat"),("all files","*.*")))
 
         try:
@@ -209,20 +211,19 @@ class GraphFrame(tk.Frame):
     def RunScan(self):
 
         #Check that there is a valid IE range
-
         try:
             i1=float(Controls.iEFrom.get())
             i2=float(Controls.iETo.get())
             if ((i2-i1)==0):
+                #If the range of scan is zero
                 print("Zero range")
                 return None
         except:
+            #If either column is empty
             print("Invalid Range")
             return None
-            
         
-
-        
+        #Check to see if a fast or slow scan is being run
         if Controls.FS_checked.get():
             print("Fast Scan")
             FastScan=True
@@ -243,6 +244,7 @@ class GraphFrame(tk.Frame):
             print ("Exiting")
             return None
 
+        #If connection was successful, log in.
         print ("Logging In to Mass Spec...")
         #Login
         s.send(b'login i,pw \r\n')
@@ -253,22 +255,14 @@ class GraphFrame(tk.Frame):
         time.sleep(0.2)
         print ("Version"+s.recv(1024).decode("utf-8"))
 
-##        #Set Initial Source Voltage
-##        print ("Initialise Source Voltage")
-##        s.send(b'SetSourceOutput IE,1300.0000\r\n')
-##        time.sleep(0.2)
-##        Dummy=(s.recv(1024).decode("utf-8"))
-
-        #Set the aquisition period and rest time (one integration)
+        #Set the aquisition period and rest time (based on single integration)
         acqTime=AqTime.get()
         acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
         s.send(str.encode(acqAStr))
         time.sleep(0.2)
         Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         acqRestTime=0.2+(acqTime/1000)
-        #print (Dummy)
-        
-        #Scan across peak
+    
         global spectrum
         rS_=[]
         iE_=[]
@@ -295,13 +289,23 @@ class GraphFrame(tk.Frame):
         global H4
         global N
 
+        #Get Number of Integrations from menu
+        AquIntTimeInt=integrations.get()        
         
         print ("Start Scan")
 
         scans=0
         total_scans=1
 
+        #Scan across a range of "N" (will be updated to scan
+        #across eg Y-Bias
+
         while scans < total_scans:
+
+
+
+
+            #Scan across voltage range
             
             SV=float(Controls.iEFrom.get())
             TV=float(Controls.iETo.get())
@@ -319,19 +323,18 @@ class GraphFrame(tk.Frame):
             fltTV=float(Controls.TVFrom.get())
             fltFV=float(Controls.FVFrom.get())
             
-
+            
             while SV < TV:
+                
                 print ("Scan Number",scans,"Voltage",SV)
 
+                #Send Ion Source Voltage Command
                 SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
                 s.send(str.encode(SVStr))
-
                 time.sleep(0.1)
                 IEreturn=(s.recv(1024))
                 time.sleep(0.1)
                 
-                #Get Number of Integrations
-                AquIntTimeInt=integrations.get()
                 #Acquire Data - wait for enough time for the buffer to fill....
                 AcqCommandToSend=('StartAcq '+ str(AquIntTimeInt)+',JS\r\n')
                 s.send(str.encode(AcqCommandToSend))
@@ -341,7 +344,7 @@ class GraphFrame(tk.Frame):
                 returnString=s.recv(4096)
                 time.sleep(0.1)
 
-                #Get the Isotopx voltages (unless running a fast scan)
+                #Get the voltages (unless running a fast scan)
                 #If running a fast scan, then the settings from the settings
                 #box on the GUI can go in the first column
                 if FastScan:
@@ -470,72 +473,53 @@ class GraphFrame(tk.Frame):
                 
                 print('Number of Int=',len(SpecIntegration))
 
-                ####
-                ## Insert a loop here containing number of integrations
-                ## which can separate the string. It can produce the data
-                ## output required for rS_, iE_ etc below
-                ## The output of spec will be:
-                ## Line 1: E00
-                ## Line 2: Data for N=1
-                ## Line 3: Data for N=2
-                ## etc
-
-                     ## Simplest method is to take these lines, average
-                     ## and produce a second "spec" to feed into rS below
-
-                
                 temp_col=5
                 averagedData=[]
+                #Loop through the columns and integrations to
+                #average out the data.
+                #Currently just the average (no std dev) is used.
 
-                #print ('XXXXXXXXXXXXXXXXX')
-
+                #Loop through channels
                 while (temp_col<16):
                     running=0.0
                     data_N=0
                     
-                    
+                    #Loop through integrations
                     while (data_N<len(SpecIntegration)):
-                        #print('data_N',data_N)
-                        #print ('SpecIntegration ', SpecIntegration[data_N])
                         dummyString=SpecIntegration[data_N].split(',')
-                        #print (temp_i,float(dummyString[temp_col]))
                         running=running+float(dummyString[temp_col])
-                        
                         data_N=data_N+1
                     
                     running=running/len(SpecIntegration)
                     averagedData.append(running)
                     temp_col=temp_col+1
-                    #print ('Column Increment',temp_col)
+                    
 
 
 
-
+                #Add the averaged data to a string.
                 temp_i=0
                 EndString=""
                 while (temp_i<len(averagedData)):
 
                        EndString=(EndString+str(averagedData[temp_i])+',')
-
-    
                        temp_i=temp_i+1
 
                 EndString=EndString[:-1]
 
 
-
+                #Reform the data string to match that created by the mass
+                #spec acquisition return
                 spec2='#'+StringStart+EndString+'#'
                 
-
-                
+                #Add the Ion Source voltage to the start of the string
                 rS=(str(SV)+","+spec2)
-                print(rS)
                 rS=rS[0:-1]
-                print(rS)
                 spectrum=rS.split(',')
 
                 #print (spectrum)
-
+                #Add the inidividual readings to the relevent array
+                #for data output and plotting
                 rS_.append(rS_String)
                 iE_.append(float(spectrum[0]))
                 L5_.append(float(spectrum[8]))
@@ -563,17 +547,14 @@ class GraphFrame(tk.Frame):
                 rS=rS_
 
                 N=len(iE)
-               # print (N,"N")
-                
+               
+                #Plot
                 p=GraphFrame.plot()
 
-
-                
+                #Increase Source Voltage                
                 SV=SV+StepSize
 
-            s.send(b'SetSourceOutput IE,1450.0000\r\n')
-            time.sleep(0.2)
-            print (s.recv(1024))
+            #Output the data to file
             self.outputData(iE,L5,L4,L3,L2,L1,Ax,H1,H2,H3,H4,rS_)          
 
 
@@ -593,7 +574,8 @@ class GraphFrame(tk.Frame):
             rS_.clear()
             
 
-
+            #Increment the scan number (will be replaced with incrementing a
+            #secondary (e.g. focus bias). 
             scans=scans+1     
 
         s.close()
@@ -608,7 +590,8 @@ class GraphFrame(tk.Frame):
             spectrum=np.genfromtxt(root.filename,delimiter=',', invalid_raise = False, names=True)
         except Warning as e:
            print (e)
-
+           return None
+    
         self.channelConv()
 
     def channelConv(self):
