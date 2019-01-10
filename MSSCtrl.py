@@ -35,6 +35,7 @@ frame2.pack(side=tk.RIGHT, fill=tk.X)
 N=0
 AqTime = tk.IntVar()
 scanOp = tk.IntVar()
+scanOpStepSize = tk.IntVar()
 integrations = tk.IntVar()
 ieStepSize = tk.StringVar()
 
@@ -90,13 +91,24 @@ class GraphFrame(tk.Frame):
         ScanOption = tk.Menu(settings)
         settings.add_cascade(label="Secondary Scan", menu=ScanOption)
 
+
         ScanOption.add_radiobutton(label='None', value=1, variable=scanOp)
         ScanOption.add_radiobutton(label='Y-Focus', value=2, variable=scanOp)
         ScanOption.add_radiobutton(label='Y-Bias', value=3, variable=scanOp)
         ScanOption.add_radiobutton(label='Electron Energy', value=4, variable=scanOp)
         ScanOption.add_radiobutton(label='Ion Repeller', value=5, variable=scanOp)
-
+        
+        ScanOption2 = tk.Menu(settings)
+        ScanOption.add_cascade(label="Step Size", menu=ScanOption2)
         scanOp.set(1)
+
+        ScanOption2.add_radiobutton(label='0.1', value=1, variable=scanOpStepSize)
+        ScanOption2.add_radiobutton(label='0.2', value=2, variable=scanOpStepSize)
+        ScanOption2.add_radiobutton(label='0.5', value=3, variable=scanOpStepSize)
+        ScanOption2.add_radiobutton(label='1', value=4, variable=scanOpStepSize)
+        
+        scanOpStepSize.set(1)
+
         
         Integrations= tk.Menu(settings)
         settings.add_cascade(label="Integrations", menu=Integrations)
@@ -300,7 +312,69 @@ class GraphFrame(tk.Frame):
         #Scan across a range of "N" (will be updated to scan
         #across eg Y-Bias
 
-        while scans < total_scans:
+        #See which secondary scan is selected, and write the appropriate
+        #command to be sent
+
+        SecondaryScanCommand=""
+        SecondaryIncrement=0.0        
+        if (scanOp.get()==1):
+            print ("No secondary scan")
+        if (scanOp.get()==2):
+            print ("Secondary Scan: Y-Focus")
+            SecondaryScanCommand=("SetSourceOutput YF,")
+            StartPoint=float(Controls.yFFrom.get())
+            EndPoint=float(Controls.yFTo.get())
+        if (scanOp.get()==3):
+            print ("Secondary Scan: Y-Bias")
+            SecondaryScanCommand=("SetSourceOutput YB,")
+            StartPoint=float(Controls.yBFrom.get())
+            EndPoint=float(Controls.yBTo.get())
+        if (scanOp.get()==4):
+            print ("Secondary Scan: Electron Energy")
+            SecondaryScanCommand=("SetSourceOutput EE,")
+            StartPoint=float(Controls.EEFrom.get())
+            EndPoint=float(Controls.EETo.get())
+        if (scanOp.get()==5):
+            print ("Secondary Scan: Ion Repeller")
+            SecondaryScanCommand=("SetSourceOutput IR,")
+            StartPoint=float(Controls.IRFrom.get())
+            EndPoint=float(Controls.IRTo.get())
+    
+        if (scanOpStepSize.get()==1): SecondaryIncrement=0.1000
+        if (scanOpStepSize.get()==2): SecondaryIncrement=0.2000
+        if (scanOpStepSize.get()==3): SecondaryIncrement=0.5000
+        if (scanOpStepSize.get()==4): SecondaryIncrement=1.0000
+
+        print (SecondaryIncrement)
+
+        print (StartPoint)
+        print (EndPoint)
+
+        if (EndPoint<StartPoint):
+            print ("Swap Numbers")
+            StartPoint_temp=EndPoint
+            EndPoint_temp=StartPoint
+
+            StartPoint=StartPoint_temp
+            EndPoint=EndPoint_temp
+        
+
+        
+        while (StartPoint<EndPoint):
+
+            SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
+            print(SecondaryScanStr)
+
+
+            s.send(str.encode(SecondaryScanStr))
+            time.sleep(0.1)
+            dummy=(s.recv(1024))
+            time.sleep(0.1)           
+            
+            
+        
+
+       # while scans < total_scans:
 
 
 
@@ -348,11 +422,45 @@ class GraphFrame(tk.Frame):
                 #If running a fast scan, then the settings from the settings
                 #box on the GUI can go in the first column
                 if FastScan:
-                    rS_IE=(str(SV)+",0")
-                    rS_YF=(str(fltYF)+",0")
-                    rS_YB=(str(fltYB)+",0")
-                    rS_EE=(str(fltEE)+",0")
-                    rS_IR=(str(fltIR)+",0")
+                    sleepyTime=0.1
+                    s.send(b'GSO IE\r\n')
+                    time.sleep(sleepyTime)
+                    rS_IE=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+
+                    s.send(b'GSO YF\r\n')
+                    time.sleep(sleepyTime)
+                    rS_YF=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
+
+
+                    s.send(b'GSO YB\r\n')
+                    time.sleep(sleepyTime)
+                    rS_YB=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+                  
+
+                    s.send(b'GSO EE\r\n')
+                    time.sleep(sleepyTime)
+                    rS_EE=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+                    
+
+                    s.send(b'GSO IR\r\n')
+                    time.sleep(sleepyTime)
+                    rS_IR=s.recv(1024).decode("utf-8")
+                    time.sleep(sleepyTime)
+                    rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+                    
+##                    rS_IE=(str(SV)+",0")
+##                    rS_YF=(str(fltYF)+",0")
+##                    rS_YB=(str(fltYB)+",0")
+##                    rS_EE=(str(fltEE)+",0")
+##                    rS_IR=(str(fltIR)+",0")
                     rS_TV=(str(fltTV)+",0")
                     rS_FC=("0,0")
                     rS_FV=(str(fltFV)+",0")
@@ -400,7 +508,6 @@ class GraphFrame(tk.Frame):
                     rS_TV=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_TV = rS_TV.replace('\n', ' ').replace('\r', '')
-
 
                     s.send(b'GSO FC\r\n')
                     time.sleep(sleepyTime)
@@ -576,7 +683,7 @@ class GraphFrame(tk.Frame):
 
             #Increment the scan number (will be replaced with incrementing a
             #secondary (e.g. focus bias). 
-            scans=scans+1     
+            StartPoint=StartPoint+SecondaryIncrement  
 
         s.close()
         
@@ -770,8 +877,61 @@ class Controls(tk.Frame):
         GraphFrame.UpdatePlot()
 
     def TestDef():
-        TV=float(Controls.iETo.get())
-        print (TV)
+
+        SecondaryScanCommand=""
+        SecondaryIncrement=0.0        
+        if (scanOp.get()==1):
+            print ("No secondary scan")
+        if (scanOp.get()==2):
+            print ("Secondary Scan: Y-Focus")
+            SecondaryScanCommand=("SetSourceOutput YF,")
+            StartPoint=float(Controls.yFFrom.get())
+            EndPoint=float(Controls.yFTo.get())
+        if (scanOp.get()==3):
+            print ("Secondary Scan: Y-Bias")
+            SecondaryScanCommand=("SetSourceOutput YB,")
+            StartPoint=float(Controls.yBFrom.get())
+            EndPoint=float(Controls.yBTo.get())
+        if (scanOp.get()==4):
+            print ("Secondary Scan: Electron Energy")
+            SecondaryScanCommand=("SetSourceOutput EE,")
+            StartPoint=float(Controls.EEFrom.get())
+            EndPoint=float(Controls.EETo.get())
+        if (scanOp.get()==5):
+            print ("Secondary Scan: Ion Repeller")
+            SecondaryScanCommand=("SetSourceOutput IR,")
+            StartPoint=float(Controls.IRFrom.get())
+            EndPoint=float(Controls.IRTo.get())
+    
+        if (scanOpStepSize.get()==1): SecondaryIncrement=0.1000
+        if (scanOpStepSize.get()==2): SecondaryIncrement=0.2000
+        if (scanOpStepSize.get()==3): SecondaryIncrement=0.5000
+        if (scanOpStepSize.get()==4): SecondaryIncrement=1.0000
+
+        print (SecondaryIncrement)
+
+        print (StartPoint)
+        print (EndPoint)
+
+        if (EndPoint<StartPoint):
+            print ("Swap Numbers")
+            StartPoint_temp=EndPoint
+            EndPoint_temp=StartPoint
+
+            StartPoint=StartPoint_temp
+            EndPoint=EndPoint_temp
+        
+
+        
+        while (StartPoint<EndPoint):
+
+            SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
+            print(SecondaryScanStr)
+            
+            StartPoint=StartPoint+SecondaryIncrement
+
+
+        
 
 
     def StatusUpdate(StatusText):
