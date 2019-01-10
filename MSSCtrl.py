@@ -315,6 +315,9 @@ class GraphFrame(tk.Frame):
         #See which secondary scan is selected, and write the appropriate
         #command to be sent
 
+        StartPoint=0
+        EndPoint=0.1
+
         SecondaryScanCommand=""
         SecondaryIncrement=0.0        
         if (scanOp.get()==1):
