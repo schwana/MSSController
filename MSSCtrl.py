@@ -305,13 +305,6 @@ class GraphFrame(tk.Frame):
         AquIntTimeInt=integrations.get()        
         
         print ("Start Scan")
-
-        scans=0
-        total_scans=1
-
-        #Scan across a range of "N" (will be updated to scan
-        #across eg Y-Bias
-
         #See which secondary scan is selected, and write the appropriate
         #command to be sent
 
@@ -373,14 +366,6 @@ class GraphFrame(tk.Frame):
             time.sleep(0.1)
             dummy=(s.recv(1024))
             time.sleep(0.1)           
-            
-            
-        
-
-       # while scans < total_scans:
-
-
-
 
             #Scan across voltage range
             
@@ -388,7 +373,6 @@ class GraphFrame(tk.Frame):
             TV=float(Controls.iETo.get())
             StepSize=float(ieStepSize.get())
 
-            print ("Scan Number",scans+1)
 
             #Load the current settings into float values
             #to populate the fast scan arrays
@@ -403,8 +387,6 @@ class GraphFrame(tk.Frame):
             
             while SV < TV:
                 
-                print ("Scan Number",scans,"Voltage",SV)
-
                 #Send Ion Source Voltage Command
                 SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
                 s.send(str.encode(SVStr))
@@ -431,19 +413,33 @@ class GraphFrame(tk.Frame):
                     rS_IE=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_IE = rS_IE.replace('\n', ' ').replace('\r', '')
+                    splitString=rS_IE.split(',')
+                    Controls.iERead.delete(0,tk.END)
+                    Controls.iERead.insert(1,splitString[1])
+                    Controls.iEFrom.delete(0,tk.END)
+                    Controls.iEFrom.insert(1,splitString[0])   
 
                     s.send(b'GSO YF\r\n')
                     time.sleep(sleepyTime)
                     rS_YF=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_YF = rS_YF.replace('\n', ' ').replace('\r', '')
-
+                    splitString=rS_YF.split(',')
+                    Controls.yFRead.delete(0,tk.END)
+                    Controls.yFRead.insert(1,splitString[1])
+                    Controls.yFFrom.delete(0,tk.END)
+                    Controls.yFFrom.insert(1,splitString[0])   
 
                     s.send(b'GSO YB\r\n')
                     time.sleep(sleepyTime)
                     rS_YB=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_YB = rS_YB.replace('\n', ' ').replace('\r', '')
+                    splitString=rS_YB.split(',')
+                    Controls.yBRead.delete(0,tk.END)
+                    Controls.yBRead.insert(1,splitString[1])
+                    Controls.yBFrom.delete(0,tk.END)
+                    Controls.yBFrom.insert(1,splitString[0])                    
                   
 
                     s.send(b'GSO EE\r\n')
@@ -451,6 +447,11 @@ class GraphFrame(tk.Frame):
                     rS_EE=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_EE = rS_EE.replace('\n', ' ').replace('\r', '')
+                    splitString=rS_EE.split(',')
+                    Controls.EERead.delete(0,tk.END)
+                    Controls.EERead.insert(1,splitString[1])
+                    Controls.EEFrom.delete(0,tk.END)
+                    Controls.EEFrom.insert(1,splitString[0])                      
                     
 
                     s.send(b'GSO IR\r\n')
@@ -458,6 +459,11 @@ class GraphFrame(tk.Frame):
                     rS_IR=s.recv(1024).decode("utf-8")
                     time.sleep(sleepyTime)
                     rS_IR = rS_IR.replace('\n', ' ').replace('\r', '')
+                    splitString=rS_IR.split(',')
+                    Controls.IRRead.delete(0,tk.END)
+                    Controls.IRRead.insert(1,splitString[1])
+                    Controls.IRFrom.delete(0,tk.END)
+                    Controls.IRFrom.insert(1,splitString[0])                      
                     
 ##                    rS_IE=(str(SV)+",0")
 ##                    rS_YF=(str(fltYF)+",0")
@@ -684,8 +690,7 @@ class GraphFrame(tk.Frame):
             rS_.clear()
             
 
-            #Increment the scan number (will be replaced with incrementing a
-            #secondary (e.g. focus bias). 
+            #Increment the "Secondary Increment"
             StartPoint=StartPoint+SecondaryIncrement  
 
         s.close()
