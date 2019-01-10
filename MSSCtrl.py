@@ -416,8 +416,7 @@ class GraphFrame(tk.Frame):
                     splitString=rS_IE.split(',')
                     Controls.iERead.delete(0,tk.END)
                     Controls.iERead.insert(1,splitString[1])
-                    Controls.iEFrom.delete(0,tk.END)
-                    Controls.iEFrom.insert(1,splitString[0])   
+
 
                     s.send(b'GSO YF\r\n')
                     time.sleep(sleepyTime)
@@ -427,8 +426,7 @@ class GraphFrame(tk.Frame):
                     splitString=rS_YF.split(',')
                     Controls.yFRead.delete(0,tk.END)
                     Controls.yFRead.insert(1,splitString[1])
-                    Controls.yFFrom.delete(0,tk.END)
-                    Controls.yFFrom.insert(1,splitString[0])   
+ 
 
                     s.send(b'GSO YB\r\n')
                     time.sleep(sleepyTime)
@@ -438,8 +436,7 @@ class GraphFrame(tk.Frame):
                     splitString=rS_YB.split(',')
                     Controls.yBRead.delete(0,tk.END)
                     Controls.yBRead.insert(1,splitString[1])
-                    Controls.yBFrom.delete(0,tk.END)
-                    Controls.yBFrom.insert(1,splitString[0])                    
+                  
                   
 
                     s.send(b'GSO EE\r\n')
@@ -450,8 +447,7 @@ class GraphFrame(tk.Frame):
                     splitString=rS_EE.split(',')
                     Controls.EERead.delete(0,tk.END)
                     Controls.EERead.insert(1,splitString[1])
-                    Controls.EEFrom.delete(0,tk.END)
-                    Controls.EEFrom.insert(1,splitString[0])                      
+                  
                     
 
                     s.send(b'GSO IR\r\n')
@@ -462,14 +458,7 @@ class GraphFrame(tk.Frame):
                     splitString=rS_IR.split(',')
                     Controls.IRRead.delete(0,tk.END)
                     Controls.IRRead.insert(1,splitString[1])
-                    Controls.IRFrom.delete(0,tk.END)
-                    Controls.IRFrom.insert(1,splitString[0])                      
-                    
-##                    rS_IE=(str(SV)+",0")
-##                    rS_YF=(str(fltYF)+",0")
-##                    rS_YB=(str(fltYB)+",0")
-##                    rS_EE=(str(fltEE)+",0")
-##                    rS_IR=(str(fltIR)+",0")
+
                     rS_TV=(str(fltTV)+",0")
                     rS_FC=("0,0")
                     rS_FV=(str(fltFV)+",0")
@@ -587,7 +576,6 @@ class GraphFrame(tk.Frame):
                              tempStr2[3]+','+
                              tempStr2[4]+',')
                 
-                print('Number of Int=',len(SpecIntegration))
 
                 temp_col=5
                 averagedData=[]
