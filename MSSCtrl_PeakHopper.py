@@ -292,6 +292,8 @@ class GraphFrame(tk.Frame):
         #How many peaks to scan
         N_PTS=len(PTSItem)
 
+        print(N_PTS)
+
         StartPoint=0
         EndPoint=N_PTS
 
@@ -299,7 +301,9 @@ class GraphFrame(tk.Frame):
         
         while (StartPoint<EndPoint):
 
-            SV=float(PTSItem(StartPoint))
+            print ("Item ",PTSItem[StartPoint])
+
+            SV=float(PTSItem[StartPoint])
 
             #Set the voltage
             SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
