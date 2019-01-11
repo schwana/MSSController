@@ -10,6 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import numpy as np
 from tkinter import filedialog
+from tkinter import messagebox
 
 matplotlib.use("TkAgg")
 
@@ -1148,6 +1149,7 @@ class Controls(tk.Frame):
         time.sleep(0.5)
         #Trap Voltage
         FV=float(Controls.FVFrom.get())
+        if (FV>1.5):
             tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
             FV=1.5
         FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
