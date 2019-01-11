@@ -710,7 +710,7 @@ class GraphFrame(tk.Frame):
         print ("Scan Number",ScanNum)
 
 
-        FileName = 'Scan'+ScanNum+'.dat'
+        FileName = 'Scan'+ScanNum+'_PH.dat'
 
         #Read Inlet Line
         rS_top=('iE(set),iE(read),YF(set),YF(read),YB(set),YB(read),EE(set),EE(read),IR(set),IR(read),TV(set),TV(read),FC(set),FC(read),FV(set),FV(read),TC(set),TC(read),EC(set),EC(read),')
@@ -752,34 +752,35 @@ class GraphFrame(tk.Frame):
         ax.clear()
         #Check to see what checkboxes are ticked.
         if Controls.L5_checked.get():
-            ax.plot(iE,L5,color='green')
+            #ax.plot(iE,L5,color='green')
+            ax.scatter(iE,L5,color='green')
         
         if Controls.L4_checked.get():
-            ax.plot(iE,L4,color='red')
+            ax.scatter(iE,L4,color='red')
 
         if Controls.L3_checked.get():
-            ax.plot(iE,L3,color='blue')
+            ax.scatter(iE,L3,color='blue')
 
         if Controls.L2_checked.get():
-            ax.plot(iE,L2,color='cyan')
+            ax.scatter(iE,L2,color='cyan')
 
         if Controls.L1_checked.get():
-            ax.plot(iE,L1,color='yellow')
+            ax.scatter(iE,L1,color='yellow')
 
         if Controls.Ax_checked.get():
-            ax.plot(iE,Ax,color='magenta')            
+            ax.scatter(iE,Ax,color='magenta')            
 
         if Controls.H1_checked.get():
-            ax.plot(iE,H1,color='black')
+            ax.scatter(iE,H1,color='black')
 
         if Controls.H2_checked.get():
-            ax.plot(iE,H2,color='0.25')              
+            ax.scatter(iE,H2,color='0.25')              
 
         if Controls.H3_checked.get():
-            ax.plot(iE,H3,color='0.5')  
+            ax.scatter(iE,H3,color='0.5')  
 
         if Controls.H4_checked.get():
-            ax.plot(iE,H4,color='0.75')
+            ax.scatter(iE,H4,color='0.75')
 
         fig.canvas.draw_idle()
         root.update()
