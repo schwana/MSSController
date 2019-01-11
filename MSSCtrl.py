@@ -1148,6 +1148,8 @@ class Controls(tk.Frame):
         time.sleep(0.5)
         #Trap Voltage
         FV=float(Controls.FVFrom.get())
+            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
+            FV=1.5
         FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
         s.send(str.encode(FVStr))
         Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))

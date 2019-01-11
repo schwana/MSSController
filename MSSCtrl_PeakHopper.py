@@ -11,6 +11,7 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import numpy as np
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 
 
 matplotlib.use("TkAgg")
@@ -30,16 +31,11 @@ frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
 frame2.pack(side=tk.RIGHT, fill=tk.X)
 
 
-
-
 #Enter globals here
 
 N=0
 AqTime = tk.IntVar()
-scanOp = tk.IntVar()
-scanOpStepSize = tk.IntVar()
 integrations = tk.IntVar()
-ieStepSize = tk.StringVar()
 PTSItem=[]
 
 
@@ -58,7 +54,7 @@ class GraphFrame(tk.Frame):
         
     def init_window(self):
         
-        self.master.title("Python Mass Spectrometer Controller")
+        self.master.title("Python Mass Spectrometer Controller (Peakhopping version)")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.NONE)
 
@@ -93,28 +89,6 @@ class GraphFrame(tk.Frame):
 
         AqTime.set(100)
 
-        ScanOption = tk.Menu(settings)
-        settings.add_cascade(label="Secondary Scan", menu=ScanOption)
-
-
-        ScanOption.add_radiobutton(label='None', value=1, variable=scanOp)
-        ScanOption.add_radiobutton(label='Y-Focus', value=2, variable=scanOp)
-        ScanOption.add_radiobutton(label='Y-Bias', value=3, variable=scanOp)
-        ScanOption.add_radiobutton(label='Electron Energy', value=4, variable=scanOp)
-        ScanOption.add_radiobutton(label='Ion Repeller', value=5, variable=scanOp)
-        
-        ScanOption2 = tk.Menu(settings)
-        ScanOption.add_cascade(label="Step Size", menu=ScanOption2)
-        scanOp.set(1)
-
-        ScanOption2.add_radiobutton(label='0.1', value=1, variable=scanOpStepSize)
-        ScanOption2.add_radiobutton(label='0.2', value=2, variable=scanOpStepSize)
-        ScanOption2.add_radiobutton(label='0.5', value=3, variable=scanOpStepSize)
-        ScanOption2.add_radiobutton(label='1', value=4, variable=scanOpStepSize)
-        
-        scanOpStepSize.set(1)
-
-        
         Integrations= tk.Menu(settings)
         settings.add_cascade(label="Integrations", menu=Integrations)
 
@@ -130,20 +104,6 @@ class GraphFrame(tk.Frame):
         Integrations.add_radiobutton(label='10', value=10, variable=integrations)
 
         integrations.set(1)
-
-
-        ieStepSize_menu= tk.Menu(settings)
-        settings.add_cascade(label="IE Step Size", menu=ieStepSize_menu)
-
-        ieStepSize_menu.add_radiobutton(label='0.1', value=0.1, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='0.2', value=0.2, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='0.5', value=0.5, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='1', value=1, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='2', value=2, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='5', value=5, variable=ieStepSize)
-        ieStepSize_menu.add_radiobutton(label='10', value=10, variable=ieStepSize)
-        
-        ieStepSize.set(0.2)
 
         menu.add_cascade(label="Settings", menu=settings)
 
@@ -213,12 +173,15 @@ class GraphFrame(tk.Frame):
         splitString=SettingsLine.split(',')
         Controls.FVFrom.delete(0,tk.END)
         Controls.FVFrom.insert(1,splitString[0])
-
                
     def RunScan(self):
 
         #Check that there is a valid IE range
-         
+        if (len(PTSItem)==0):
+            tk.messagebox.showerror("Error", "No peaks to scan")
+
+            return None
+            
         #Check to see if a fast or slow scan is being run
         if Controls.FS_checked.get():
             print("Fast Scan")
@@ -881,6 +844,7 @@ class Controls(tk.Frame):
 
         except socket.error as e:
             print ("Error: ",e)
+            tk.messagebox.showwarning("Warning", "Mass Spec Not Connected")
             Controls.StatusUpdate("Offline")
             return None
             
@@ -1078,6 +1042,9 @@ class Controls(tk.Frame):
         time.sleep(0.5)
         #Trap Voltage
         FV=float(Controls.FVFrom.get())
+        if (FV>1.5):
+            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
+            FV=1.5
         FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
         s.send(str.encode(FVStr))
         Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
