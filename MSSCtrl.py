@@ -1072,6 +1072,20 @@ class Controls(tk.Frame):
         Controls.ECRead.insert(1,splitString[1])
 
         Controls.StatusUpdate("Voltages Read")
+
+        s.send(b'GCP \r\n')
+        time.sleep(sleepyTime)
+        GCP=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+
+        print (GCP)
+
+        s.send(b'GFCM \r\n')
+        time.sleep(sleepyTime)
+        GFCM=s.recv(1024).decode("utf-8")
+        time.sleep(sleepyTime)
+
+        print (GFCM)        
         
         s.close()
 
