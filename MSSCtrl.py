@@ -874,62 +874,48 @@ class Controls(tk.Frame):
         GraphFrame.UpdatePlot()
 
     def TestDef():
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
 
-        SecondaryScanCommand=""
-        SecondaryIncrement=0.0        
-        if (scanOp.get()==1):
-            print ("No secondary scan")
-        if (scanOp.get()==2):
-            print ("Secondary Scan: Y-Focus")
-            SecondaryScanCommand=("SetSourceOutput YF,")
-            StartPoint=float(Controls.yFFrom.get())
-            EndPoint=float(Controls.yFTo.get())
-        if (scanOp.get()==3):
-            print ("Secondary Scan: Y-Bias")
-            SecondaryScanCommand=("SetSourceOutput YB,")
-            StartPoint=float(Controls.yBFrom.get())
-            EndPoint=float(Controls.yBTo.get())
-        if (scanOp.get()==4):
-            print ("Secondary Scan: Electron Energy")
-            SecondaryScanCommand=("SetSourceOutput EE,")
-            StartPoint=float(Controls.EEFrom.get())
-            EndPoint=float(Controls.EETo.get())
-        if (scanOp.get()==5):
-            print ("Secondary Scan: Ion Repeller")
-            SecondaryScanCommand=("SetSourceOutput IR,")
-            StartPoint=float(Controls.IRFrom.get())
-            EndPoint=float(Controls.IRTo.get())
-    
-        if (scanOpStepSize.get()==1): SecondaryIncrement=0.1000
-        if (scanOpStepSize.get()==2): SecondaryIncrement=0.2000
-        if (scanOpStepSize.get()==3): SecondaryIncrement=0.5000
-        if (scanOpStepSize.get()==4): SecondaryIncrement=1.0000
+        try:
+            #Connect to instrument
 
-        print (SecondaryIncrement)
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
 
-        print (StartPoint)
-        print (EndPoint)
-
-        if (EndPoint<StartPoint):
-            print ("Swap Numbers")
-            StartPoint_temp=EndPoint
-            EndPoint_temp=StartPoint
-
-            StartPoint=StartPoint_temp
-            EndPoint=EndPoint_temp
-        
-
-        
-        while (StartPoint<EndPoint):
-
-            SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
-            print(SecondaryScanStr)
+        except socket.error as e:
+            print ("Error: ",e)
+            Controls.StatusUpdate("Offline")
+            return None
             
-            StartPoint=StartPoint+SecondaryIncrement
+        #Login
+        Controls.StatusUpdate("Logging In")
+        s.send(b'login i,pw \r\n')
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
+        s.send(b'ver\r\n')
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'SFCM trap\r\n')
+        time.sleep(0.2)
+        print ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+
+        s.send(b'SSO TC,200\r\n')
+        time.sleep(0.2)
+        print ("Trap Current Set: "+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'GFCM \r\n')
+        time.sleep(0.2)
+        GFCM=s.recv(1024).decode("utf-8")
+        time.sleep(0.2)
+
+        print (GFCM)        
 
 
         
-
+        s.close()
 
     def StatusUpdate(StatusText):
         #Update the status bar with any messages
