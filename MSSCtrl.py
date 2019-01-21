@@ -212,13 +212,13 @@ class GraphFrame(tk.Frame):
         splitString=SettingsLine.split(',')
         Controls.TVFrom.delete(0,tk.END)
         Controls.TVFrom.insert(1,splitString[0])       
-        #Filament Voltage
+        #Trap Current
         dataLine=settings[6]
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
-        Controls.FVFrom.delete(0,tk.END)
-        Controls.FVFrom.insert(1,splitString[0])
+        Controls.TCFrom.delete(0,tk.END)
+        Controls.TCFrom.insert(1,splitString[0])
 
                
     def RunScan(self):
@@ -1111,6 +1111,7 @@ class Controls(tk.Frame):
         s.send(str.encode(SVStr))
         Dummy= ("Source Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)
         #Y Focus
         YF=float(Controls.yFFrom.get())
@@ -1118,6 +1119,7 @@ class Controls(tk.Frame):
         s.send(str.encode(YFStr))
         Dummy= ("Y-Focus: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)
         #Y Bias
         YB=float(Controls.yBFrom.get())
@@ -1125,6 +1127,7 @@ class Controls(tk.Frame):
         s.send(str.encode(YBStr))
         Dummy= ("Y-Bias: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)       
         #Electron Energy
         EE=float(Controls.EEFrom.get())
@@ -1132,6 +1135,7 @@ class Controls(tk.Frame):
         s.send(str.encode(EEStr))
         Dummy= ("Electron Energy: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)  
         #Ion Repeller
         IR=float(Controls.IRFrom.get())
@@ -1139,6 +1143,7 @@ class Controls(tk.Frame):
         s.send(str.encode(IRStr))
         Dummy= ("Ion Repeller: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)  
         #Trap Voltage
         TV=float(Controls.TVFrom.get())
@@ -1146,19 +1151,38 @@ class Controls(tk.Frame):
         s.send(str.encode(TVStr))
         Dummy= ("Trap Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(0.5)
-        #Trap Voltage
-        FV=float(Controls.FVFrom.get())
-        if (FV>1.5):
-            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
-            FV=1.5
-        FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
-        s.send(str.encode(FVStr))
-        Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
-        print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)
 
-        Controls.StatusUpdate("Commands Sent")
+        #Trap Current
+        s.send(b'SFCM trap\r\n')
+        time.sleep(0.2)
+        Dummy= ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+        Controls.StatusUpdate(Dummy)
+        TC=float(Controls.TCFrom.get())
+        if (TC>250):
+            tk.messagebox.showwarning("Warning","Trap Current limited to 250uA")
+            TC=250.0
+        FVStr=("SetSourceOutput TC,"+str(TC)+"\r\n")
+        s.send(str.encode(FVStr))
+        Dummy= ("Trap Current: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        print (Dummy)
+        Controls.StatusUpdate(Dummy)
+        time.sleep(0.5)
+
+
+##        #Trap Voltage
+##        FV=float(Controls.FVFrom.get())
+##        if (FV>1.5):
+##            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
+##            FV=1.5
+##        FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
+##        s.send(str.encode(FVStr))
+##        Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+##        print (Dummy)
+##        time.sleep(0.5)
+##
+##        Controls.StatusUpdate("Commands Sent")
 
         s.close()
         
@@ -1258,8 +1282,8 @@ class Controls(tk.Frame):
     FVframe=tk.Frame(frame2)
     FVlbl = tk.Label(FVframe, text="FV",width=5,anchor='w')
     FVlbl.pack(side=tk.LEFT)
-    FVFrom = tk.Entry(FVframe,width=8)
-    FVFrom.pack(side="left",padx=5)
+    FVFrom = tk.Label(FVframe, text="",width=8)
+    FVFrom.pack(side="left",padx=0)
     FVTo = tk.Label(FVframe, text="",width=8)
     FVTo.pack(side="left",padx=0)
     FVRead = tk.Entry(FVframe,width=8)
@@ -1269,8 +1293,8 @@ class Controls(tk.Frame):
     TCframe=tk.Frame(frame2)
     TClbl = tk.Label(TCframe, text="TC",width=5,anchor='w')
     TClbl.pack(side=tk.LEFT)
-    TCFrom = tk.Label(TCframe, text="",width=8)
-    TCFrom.pack(side="left",padx=0)
+    TCFrom = tk.Entry(TCframe,width=8)
+    TCFrom.pack(side="left",padx=5)
     TCTo = tk.Label(TCframe, text="",width=8)
     TCTo.pack(side="left",padx=0)
     TCRead = tk.Entry(TCframe,width=8)
