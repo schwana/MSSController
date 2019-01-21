@@ -383,7 +383,7 @@ class GraphFrame(tk.Frame):
             fltEE=float(Controls.EEFrom.get())
             fltIR=float(Controls.IRFrom.get())
             fltTV=float(Controls.TVFrom.get())
-            fltFV=float(Controls.FVFrom.get())
+            fltFV=float(Controls.FVRead.get())
             
             
             while SV < TV:
@@ -1036,9 +1036,6 @@ class Controls(tk.Frame):
         splitString=rS_FV.split(',')
         Controls.FVRead.delete(0,tk.END)
         Controls.FVRead.insert(1,splitString[1])
-        Controls.FVFrom.delete(0,tk.END)
-        Controls.FVFrom.insert(1,splitString[0])
-
         s.send(b'GSO TC\r\n')
         time.sleep(sleepyTime)
         rS_TC=s.recv(1024).decode("utf-8")
@@ -1047,6 +1044,10 @@ class Controls(tk.Frame):
         splitString=rS_TC.split(',')
         Controls.TCRead.delete(0,tk.END)
         Controls.TCRead.insert(1,splitString[1])
+        Controls.TCFrom.delete(0,tk.END)
+        Controls.TCFrom.insert(1,splitString[0])
+
+
 
         s.send(b'GSO EC\r\n')
         time.sleep(sleepyTime)
