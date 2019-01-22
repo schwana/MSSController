@@ -902,7 +902,7 @@ class Controls(tk.Frame):
         time.sleep(0.2)
         print ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
 
-        s.send(b'SSO TC,200\r\n')
+        s.send(b'SSO TC,150\r\n')
         time.sleep(0.2)
         print ("Trap Current Set: "+s.recv(1024).decode("utf-8"))
         

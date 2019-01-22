@@ -166,13 +166,14 @@ class GraphFrame(tk.Frame):
         splitString=SettingsLine.split(',')
         Controls.TVFrom.delete(0,tk.END)
         Controls.TVFrom.insert(1,splitString[0])       
-        #Filament Voltage
+        #Trap Current
         dataLine=settings[6]
         dataString=str(dataLine)
         SettingsLine=(dataString[1:-1])
         splitString=SettingsLine.split(',')
-        Controls.FVFrom.delete(0,tk.END)
-        Controls.FVFrom.insert(1,splitString[0])
+        Controls.TCFrom.delete(0,tk.END)
+        Controls.TCFrom.insert(1,splitString[0])
+
                
     def RunScan(self):
 
@@ -767,57 +768,48 @@ class Controls(tk.Frame):
         GraphFrame.UpdatePlot()
 
     def TestDef():
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
 
-        SecondaryScanCommand=""
-        SecondaryIncrement=0.0        
-        if (scanOp.get()==1):
-            print ("No secondary scan")
-        if (scanOp.get()==2):
-            print ("Secondary Scan: Y-Focus")
-            SecondaryScanCommand=("SetSourceOutput YF,")
-            StartPoint=float(Controls.yFFrom.get())
-            EndPoint=float(Controls.yFTo.get())
-        if (scanOp.get()==3):
-            print ("Secondary Scan: Y-Bias")
-            SecondaryScanCommand=("SetSourceOutput YB,")
-            StartPoint=float(Controls.yBFrom.get())
-            EndPoint=float(Controls.yBTo.get())
-        if (scanOp.get()==4):
-            print ("Secondary Scan: Electron Energy")
-            SecondaryScanCommand=("SetSourceOutput EE,")
-            StartPoint=float(Controls.EEFrom.get())
-            EndPoint=float(Controls.EETo.get())
-        if (scanOp.get()==5):
-            print ("Secondary Scan: Ion Repeller")
-            SecondaryScanCommand=("SetSourceOutput IR,")
-            StartPoint=float(Controls.IRFrom.get())
-            EndPoint=float(Controls.IRTo.get())
-    
-        if (scanOpStepSize.get()==1): SecondaryIncrement=0.1000
-        if (scanOpStepSize.get()==2): SecondaryIncrement=0.2000
-        if (scanOpStepSize.get()==3): SecondaryIncrement=0.5000
-        if (scanOpStepSize.get()==4): SecondaryIncrement=1.0000
+        try:
+            #Connect to instrument
 
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
 
-        print (StartPoint)
-        print (EndPoint)
-
-        if (EndPoint<StartPoint):
-            print ("Swap Numbers")
-            StartPoint_temp=EndPoint
-            EndPoint_temp=StartPoint
-
-            StartPoint=StartPoint_temp
-            EndPoint=EndPoint_temp
-        
-
-        
-        while (StartPoint<EndPoint):
-
-            SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
-            print(SecondaryScanStr)
+        except socket.error as e:
+            print ("Error: ",e)
+            Controls.StatusUpdate("Offline")
+            return None
             
-            StartPoint=StartPoint+SecondaryIncrement
+        #Login
+        Controls.StatusUpdate("Logging In")
+        s.send(b'login i,pw \r\n')
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
+        s.send(b'ver\r\n')
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'SFCM trap\r\n')
+        time.sleep(0.2)
+        print ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+
+        s.send(b'SSO TC,150\r\n')
+        time.sleep(0.2)
+        print ("Trap Current Set: "+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'GFCM \r\n')
+        time.sleep(0.2)
+        GFCM=s.recv(1024).decode("utf-8")
+        time.sleep(0.2)
+
+        print (GFCM)        
+
+
+        
+        s.close()
 
 
         
@@ -1032,24 +1024,42 @@ class Controls(tk.Frame):
         s.send(str.encode(IRStr))
         Dummy= ("Ion Repeller: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
-        time.sleep(0.5)  
-        #Trap Voltage
-        TV=float(Controls.TVFrom.get())
-        TVStr=("SetSourceOutput TV,"+str(TV)+"\r\n")
-        s.send(str.encode(TVStr))
-        Dummy= ("Trap Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
-        print (Dummy)
         time.sleep(0.5)
-        #Trap Voltage
-        FV=float(Controls.FVFrom.get())
-        if (FV>1.5):
-            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
-            FV=1.5
-        FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
+
+        #Trap Current
+        s.send(b'SFCM trap\r\n')
+        time.sleep(0.2)
+        Dummy= ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+        Controls.StatusUpdate(Dummy)
+        TC=float(Controls.TCFrom.get())
+        if (TC>250):
+            tk.messagebox.showwarning("Warning","Trap Current limited to 250uA")
+            TC=250.0
+        FVStr=("SetSourceOutput TC,"+str(TC)+"\r\n")
         s.send(str.encode(FVStr))
-        Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+        Dummy= ("Trap Current: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         print (Dummy)
+        Controls.StatusUpdate(Dummy)
         time.sleep(0.5)
+
+##        
+##        #Trap Voltage
+##        TV=float(Controls.TVFrom.get())
+##        TVStr=("SetSourceOutput TV,"+str(TV)+"\r\n")
+##        s.send(str.encode(TVStr))
+##        Dummy= ("Trap Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+##        print (Dummy)
+##        time.sleep(0.5)
+##        #Trap Voltage
+##        FV=float(Controls.FVFrom.get())
+##        if (FV>1.5):
+##            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
+##            FV=1.5
+##        FVStr=("SetSourceOutput FV,"+str(FV)+"\r\n")
+##        s.send(str.encode(FVStr))
+##        Dummy= ("Filament Voltage: ",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
+##        print (Dummy)
+##        time.sleep(0.5)
 
         Controls.StatusUpdate("Commands Sent")
 
@@ -1168,8 +1178,8 @@ class Controls(tk.Frame):
     FVframe=tk.Frame(frame2)
     FVlbl = tk.Label(FVframe, text="FV",width=5,anchor='w')
     FVlbl.pack(side=tk.LEFT)
-    FVFrom = tk.Entry(FVframe,width=8)
-    FVFrom.pack(side="left",padx=5)
+    FVFrom = tk.Label(FVframe, text="",width=8)
+    FVFrom.pack(side="left",padx=0)
     FVRead = tk.Entry(FVframe,width=8)
     FVRead.pack(side="left",padx=5)
     FVframe.pack(side=tk.TOP, fill=tk.NONE)    
@@ -1177,11 +1187,12 @@ class Controls(tk.Frame):
     TCframe=tk.Frame(frame2)
     TClbl = tk.Label(TCframe, text="TC",width=5,anchor='w')
     TClbl.pack(side=tk.LEFT)
-    TCFrom = tk.Label(TCframe, text="",width=8)
-    TCFrom.pack(side="left",padx=0)
+    TCFrom = tk.Entry(TCframe,width=8)
+    TCFrom.pack(side="left",padx=5)
     TCRead = tk.Entry(TCframe,width=8)
     TCRead.pack(side="left",padx=5)
     TCframe.pack(side=tk.TOP, fill=tk.NONE)    
+
     #Emission Current
     ECframe=tk.Frame(frame2)
     EClbl = tk.Label(ECframe, text="EC",width=5,anchor='w')
