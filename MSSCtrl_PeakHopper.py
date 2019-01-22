@@ -284,7 +284,7 @@ class GraphFrame(tk.Frame):
             fltEE=float(Controls.EEFrom.get())
             fltIR=float(Controls.IRFrom.get())
             fltTV=float(Controls.TVFrom.get())
-            fltFV=float(Controls.FVFrom.get())
+            fltFV=float(Controls.FVRead.get())
 
             #Do N scans
 
@@ -935,8 +935,7 @@ class Controls(tk.Frame):
         splitString=rS_FV.split(',')
         Controls.FVRead.delete(0,tk.END)
         Controls.FVRead.insert(1,splitString[1])
-        Controls.FVFrom.delete(0,tk.END)
-        Controls.FVFrom.insert(1,splitString[0])
+
 
         s.send(b'GSO TC\r\n')
         time.sleep(sleepyTime)
