@@ -302,10 +302,10 @@ class GraphFrame(tk.Frame):
                 returnString=s.recv(4096)
                 time.sleep(0.1)
 
-                AcqStop=('StopAcq \r\n')
-                s.send(str.encode(AcqCommandToSend))
-                returnedStop=s.recv(1024).decode("utf-8")
-                print(N_init, returnedStop)
+##                AcqStop=('StopAcq \r\n')
+##                s.send(str.encode(AcqCommandToSend))
+##                returnedStop=s.recv(1024).decode("utf-8")
+##                print(N_init, returnedStop)
 
                 
 
