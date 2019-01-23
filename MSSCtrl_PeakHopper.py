@@ -302,6 +302,13 @@ class GraphFrame(tk.Frame):
                 returnString=s.recv(4096)
                 time.sleep(0.1)
 
+                AcqStop=('StopAcq \r\n')
+                s.send(str.encode(AcqCommandToSend))
+                returnedStop=s.recv(1024).decode("utf-8")
+                print(N_init, returnedStop)
+
+                
+
                 #Get the voltages (unless running a fast scan)
                 #If running a fast scan, then the settings from the settings
                 #box on the GUI can go in the first column
