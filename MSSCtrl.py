@@ -1172,7 +1172,7 @@ class Controls(tk.Frame):
         time.sleep(0.5)
 
 
-##        #Trap Voltage
+##        #Filament Voltage
 ##        FV=float(Controls.FVFrom.get())
 ##        if (FV>1.5):
 ##            tk.messagebox.showwarning("Warning","Filament Voltage limited to 1.5V")
@@ -1187,6 +1187,95 @@ class Controls(tk.Frame):
 
         s.close()
         
+
+    def FilOn():
+        print ('Filament On')
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+
+        try:
+            #Connect to instrument
+
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
+
+        except socket.error as e:
+            print ("Error: ",e)
+            Controls.StatusUpdate("Offline")
+            return None
+            
+        #Login
+        Controls.StatusUpdate("Logging In")
+        s.send(b'login i,pw \r\n')
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
+        s.send(b'ver\r\n')
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'SFCM trap\r\n')
+        time.sleep(0.2)
+        print ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+
+        s.send(b'SSO TC,50\r\n')
+        time.sleep(0.2)
+        print ("Trap Current Set: "+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'GFCM \r\n')
+        time.sleep(0.2)
+        GFCM=s.recv(1024).decode("utf-8")
+        time.sleep(0.2)
+
+        print (GFCM)        
+
+
+        
+        s.close()
+
+    def FilOff():
+        print ('Filament Off')
+        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+
+        try:
+            #Connect to instrument
+
+            s.connect(('localhost',1090))
+            print (s.recv(1024).decode("utf-8"))
+
+        except socket.error as e:
+            print ("Error: ",e)
+            Controls.StatusUpdate("Offline")
+            return None
+            
+        #Login
+        Controls.StatusUpdate("Logging In")
+        s.send(b'login i,pw \r\n')
+        time.sleep(0.2)
+        print (s.recv(1024).decode("utf-8"))
+        time.sleep(0.2)
+        s.send(b'ver\r\n')
+        time.sleep(0.2)
+        print ("Version"+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'SFCM filament\r\n')
+        time.sleep(0.2)
+        print ("Filament Control mode: "+s.recv(1024).decode("utf-8"))
+
+        s.send(b'SSO FV,0\r\n')
+        time.sleep(0.2)
+        print ("Filament Off: "+s.recv(1024).decode("utf-8"))
+        
+        s.send(b'GFCM \r\n')
+        time.sleep(0.2)
+        GFCM=s.recv(1024).decode("utf-8")
+        time.sleep(0.2)
+
+        print (GFCM)        
+      
+        s.close()
+
 
     #FRAME FOR SETTINGS (ION ENERGY ETC)
     TopRow=tk.Frame(frame2)
@@ -1320,7 +1409,8 @@ class Controls(tk.Frame):
    
     CtrlFrame1= tk.Frame(frame2)
     CtrlFrame2= tk.Frame(frame2)
-    CtrlFrame3= tk.Frame(frame2)   
+    CtrlFrame3= tk.Frame(frame2)
+    CtrlFrame4= tk.Frame(frame2) 
 
     L5_checked = tk.IntVar()
     L5_checked.trace("w", callback)
@@ -1396,9 +1486,19 @@ class Controls(tk.Frame):
     b = tk.Button(CtrlFrame3, text="TEST", command=TestDef)
     b.pack()
 
+    FilOn = tk.Button(CtrlFrame4, text="F.On", command=FilOn)
+    FilOn.pack(side="left")
+    FilOff = tk.Button(CtrlFrame4, text="F.Off", command=FilOff)
+    FilOff.pack(side="left")
+
     CtrlFrame1.pack(side=tk.TOP, fill=tk.NONE,pady=3)
     CtrlFrame2.pack(side=tk.TOP, fill=tk.NONE,pady=3)
     CtrlFrame3.pack(side=tk.TOP, fill=tk.NONE,pady=5)
+    CtrlFrame4.pack(side=tk.TOP, fill=tk.NONE,pady=3)
+
+
+
+
         
 # root window created. Here, that would be the only window, but
 # you can later have windows within windows.
