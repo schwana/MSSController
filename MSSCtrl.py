@@ -359,6 +359,14 @@ class GraphFrame(tk.Frame):
         
         while (StartPoint<EndPoint):
 
+            #Set at 1000V before each scan for 30 seconds
+            SVStr=("SetSourceOutput IE, 1000 \r\n")
+            s.send(str.encode(SVStr))
+            time.sleep(0.1)
+            IEreturn=(s.recv(1024))
+            time.sleep(30)    
+            
+
             SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
             print(SecondaryScanStr)
 
@@ -680,7 +688,14 @@ class GraphFrame(tk.Frame):
             
 
             #Increment the "Secondary Increment"
-            StartPoint=StartPoint+SecondaryIncrement  
+            StartPoint=StartPoint+SecondaryIncrement
+
+        #Set at 1000V before each scan for 30 seconds
+        SVStr=("SetSourceOutput IE, 1000 \r\n")
+        s.send(str.encode(SVStr))
+        time.sleep(0.1)
+        IEreturn=(s.recv(1024))
+                
 
         s.close()
         
@@ -1184,6 +1199,12 @@ class Controls(tk.Frame):
 ##        time.sleep(0.5)
 ##
 ##        Controls.StatusUpdate("Commands Sent")
+
+        #To avoid charging issues, for now, sit at 1000V while not running
+        SVStr=("SetSourceOutput IE, 1000 \r\n")
+        s.send(str.encode(SVStr))
+        time.sleep(0.1)
+        IEreturn=(s.recv(1024))
 
         s.close()
         
