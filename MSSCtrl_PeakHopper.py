@@ -265,6 +265,15 @@ class GraphFrame(tk.Frame):
         
         while (StartPoint<EndPoint):
 
+            #To avoid charging issues, for now, sit at 1000V between scans
+            print ("1000V")
+            SVStr=("SetSourceOutput IE, 1000 \r\n")
+            s.send(str.encode(SVStr))
+            time.sleep(0.1)
+            IEreturn=(s.recv(1024))
+            time.sleep(30)
+            print ("Start scan")
+
             print ("Item ",PTSItem[StartPoint])
 
             SV=float(PTSItem[StartPoint])
@@ -564,7 +573,13 @@ class GraphFrame(tk.Frame):
                 N_init=N_init+1
 
             #Increment the "Secondary Increment"
-            StartPoint=StartPoint+1  
+            StartPoint=StartPoint+1
+
+        print ("set to 1000V")
+        SVStr=("SetSourceOutput IE, 1000 \r\n")
+        s.send(str.encode(SVStr))
+        time.sleep(0.1)
+        IEreturn=(s.recv(1024))
 
         s.close()
         #Output the data to file
