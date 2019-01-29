@@ -302,6 +302,10 @@ class GraphFrame(tk.Frame):
             
             while N_init < N_scans:
                 
+                acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
+                s.send(str.encode(acqAStr))
+                time.sleep(0.2)
+                Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
                 #Acquire Data - wait for enough time for the buffer to fill....
                 AcqCommandToSend=('StartAcq '+ str(AquIntTimeInt)+',JS\r\n')
                 s.send(str.encode(AcqCommandToSend))
