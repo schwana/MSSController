@@ -266,12 +266,12 @@ class GraphFrame(tk.Frame):
         while (StartPoint<EndPoint):
 
             #To avoid charging issues, for now, sit at 1000V between scans
-            print ("1000V")
-            SVStr=("SetSourceOutput IE, 1000 \r\n")
-            s.send(str.encode(SVStr))
-            time.sleep(0.1)
-            IEreturn=(s.recv(1024))
-            time.sleep(30)
+##            print ("1000V")
+##            SVStr=("SetSourceOutput IE, 1000 \r\n")
+##            s.send(str.encode(SVStr))
+##            time.sleep(0.1)
+##            IEreturn=(s.recv(1024))
+            
             print ("Start scan")
 
             print ("Item ",PTSItem[StartPoint])
@@ -285,6 +285,8 @@ class GraphFrame(tk.Frame):
             IEreturn=(s.recv(1024))
             time.sleep(0.1)
 
+           # time.sleep(30)
+
             #Load the current settings into float values
             #to populate the fast scan arrays
 
@@ -297,10 +299,11 @@ class GraphFrame(tk.Frame):
 
             #Do N scans
 
-            N_scans=30
+            N_scans=120
             N_init=0
             
             while N_init < N_scans:
+                print (N_init)
                 
                 acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
                 s.send(str.encode(acqAStr))
@@ -579,11 +582,11 @@ class GraphFrame(tk.Frame):
             #Increment the "Secondary Increment"
             StartPoint=StartPoint+1
 
-        print ("set to 1000V")
-        SVStr=("SetSourceOutput IE, 1000 \r\n")
-        s.send(str.encode(SVStr))
-        time.sleep(0.1)
-        IEreturn=(s.recv(1024))
+##        print ("set to 1000V")
+##        SVStr=("SetSourceOutput IE, 1000 \r\n")
+##        s.send(str.encode(SVStr))
+##        time.sleep(0.1)
+##        IEreturn=(s.recv(1024))
 
         s.close()
         #Output the data to file
