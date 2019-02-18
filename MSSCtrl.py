@@ -359,12 +359,12 @@ class GraphFrame(tk.Frame):
         
         while (StartPoint<EndPoint):
 
-            #Set at 1000V before each scan for 30 seconds
-            SVStr=("SetSourceOutput IE, 1000 \r\n")
-            s.send(str.encode(SVStr))
-            time.sleep(0.1)
-            IEreturn=(s.recv(1024))
-            time.sleep(30)    
+         #   #Set at 1000V before each scan for 30 seconds
+         #   SVStr=("SetSourceOutput IE, 0 \r\n")
+         #   s.send(str.encode(SVStr))
+         #   time.sleep(0.1)
+         #   IEreturn=(s.recv(1024))
+         #   time.sleep(30)    
             
 
             SecondaryScanStr=(SecondaryScanCommand+"{0:.3f} \r\n").format(StartPoint)
