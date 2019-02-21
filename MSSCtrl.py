@@ -696,7 +696,7 @@ class GraphFrame(tk.Frame):
             StartPoint=StartPoint+SecondaryIncrement
 
         #Set at 1000V before each scan for 30 seconds
-        SVStr=("SetSourceOutput IE, 1000 \r\n")
+        SVStr=("SetSourceOutput IE, 0 \r\n")
         s.send(str.encode(SVStr))
         time.sleep(0.1)
         IEreturn=(s.recv(1024))
