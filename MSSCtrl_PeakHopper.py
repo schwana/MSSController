@@ -299,7 +299,7 @@ class GraphFrame(tk.Frame):
 
             #Do N scans
 
-            N_scans=120
+            N_scans=60
             N_init=0
             
             while N_init < N_scans:
