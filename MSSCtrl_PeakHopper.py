@@ -73,6 +73,9 @@ class GraphFrame(tk.Frame):
         
         settings = tk.Menu(menu)
         settings.add_command(label="Load Settings",command=self.LoadSettings)
+
+        settings.add_command(label="Load Peaks",command=self.LoadPeaks)
+
         aqutime = tk.Menu(settings)
         settings.add_cascade(label="Acquisition Time", menu=aqutime)
 
@@ -113,6 +116,43 @@ class GraphFrame(tk.Frame):
            
     def exit(self):
         exit()
+
+    def LoadPeaks(self):
+        #Load the settings from file
+        root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("dat files","*.dat"),("all files","*.*")))
+
+        try:
+            settings=np.genfromtxt(root.filename,delimiter=',', invalid_raise = False, names=True)
+        except filedialog.EXCEPTION as e:
+           print (e)
+           return None
+
+        print (len(settings))
+
+        i=0
+        while (i<len(settings)):
+            dataLine=settings[i]
+            dataString=str(dataLine)
+            SettingsLine=(dataString[1:-1])
+            splitString=SettingsLine.split(',')
+            PTSItem.append(splitString[0])
+            NumItems=len(PTSItem)
+            Controls.PTSList.config(values=PTSItem)
+            print (splitString[1])
+            if (int(float(splitString[1]))==1):
+                print ("Centre")
+                Controls.PTSInput.delete(0,tk.END)
+                Controls.PTSInput.insert(1,splitString[0]) 
+            i=i+1
+
+
+##        #Get Number Lines in ComboBox
+##        PTS=(Controls.PTSInput.get())
+##        print (len(PTSItem))
+##        PTSItem.append(PTS)
+##        NumItems=len(PTSItem)
+##        Controls.PTSList.config(values=PTSItem)
+
 
     def LoadSettings(self):
         #Load the settings from file
@@ -1203,7 +1243,7 @@ class Controls(tk.Frame):
     PTSFrame=tk.Frame(frame2)
     PTSInput = tk.Entry(PTSFrame,width=8)
     PTSInput.pack(side="left",padx=5)
-    PTSAdd = tk.Button(PTSFrame, text="Add", width=4, command=AddPTS)
+    PTSAdd = tk.Button(PTSFrame, text="Scan", width=4, command=AddPTS)
     PTSAdd.pack(side=tk.LEFT,padx=5)
     PTSList = ttk.Combobox(PTSFrame, values=PTSItem, width=8)
     PTSList.pack(side=tk.LEFT,padx=5)
