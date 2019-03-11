@@ -1203,6 +1203,11 @@ class Controls(tk.Frame):
         acqRestTime=0.1+(acqTime/1000)
 
         IE=StartIE
+        SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
+        s.send(str.encode(SVStr))
+        time.sleep(0.1)
+        IEreturn=(s.recv(1024))
+        time.sleep(5)
 
         while (IE<(EndIE+1)):
             
@@ -1242,17 +1247,9 @@ class Controls(tk.Frame):
             SpecIntegration=[]
             StringStart=""
             while (temp_i<len(tempStr)):
-                
-
                 SpecIntegration.append(tempStr[temp_i])
-
-
                 data_N=data_N+1
                 temp_i=temp_i+2
-
-
-            
-            
             tempStr2=tempStr[1].split(',')
 
             StringStart=(tempStr2[0]+','+
@@ -1261,7 +1258,6 @@ class Controls(tk.Frame):
                          tempStr2[3]+','+
                          tempStr2[4]+',')
             
-
             temp_col=5
             averagedData=[]
             #Loop through the columns and integrations to
