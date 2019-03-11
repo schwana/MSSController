@@ -1341,19 +1341,18 @@ class Controls(tk.Frame):
             p=GraphFrame.plot()
 
 
-
-
-
             IE=IE+1
-
-
-
-
 
 
 
         s.close()
 
+
+        #Calculate the peak centre
+        #Need iE and Ax for this.
+
+        print (max(Ax))
+        
         #Reset Arrays
         iE.clear()
         L5.clear()
