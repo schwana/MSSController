@@ -1167,8 +1167,8 @@ class Controls(tk.Frame):
         PeakToScan=float(Controls.PTSInput.get())
         print (PeakToScan)
 
-        StartIE=PeakToScan-20
-        EndIE=PeakToScan+20
+        StartIE=PeakToScan-40
+        EndIE=PeakToScan+40
         
         #Connect to instrument
         print ("Connecting to mass spec")
@@ -1202,6 +1202,8 @@ class Controls(tk.Frame):
         Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
         acqRestTime=0.1+(acqTime/1000)
 
+        IE=StartIE
+
         while (IE<(EndIE+1)):
             
             SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
@@ -1218,6 +1220,15 @@ class Controls(tk.Frame):
             time.sleep((acqRestTime))
             returnString=s.recv(1024)
             time.sleep(0.1)
+
+            rS_String=(","+str(0.0) + ","+str(0.0)+ ","+str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ "," +
+                        str(0.0)+ ",")
 
             #Separate the string
             spec=(returnString.decode("utf-8"))
@@ -1291,7 +1302,7 @@ class Controls(tk.Frame):
             spec2='#'+StringStart+EndString+'#'
             
             #Add the Ion Source voltage to the start of the string
-            rS=(str(SV)+","+spec2)
+            rS=(str(IE)+","+spec2)
             rS=rS[0:-1]
             spectrum=rS.split(',')
 
@@ -1300,16 +1311,16 @@ class Controls(tk.Frame):
             #for data output and plotting
             rS_.append(rS_String)
             iE_.append(float(spectrum[0]))
-            L5_.append(float(spectrum[8]))
-            L4_.append(float(spectrum[9]))
-            L3_.append(float(spectrum[10]))
-            L2_.append(float(spectrum[11]))
-            L1_.append(float(spectrum[12]))
+            L5_.append(0.0)
+            L4_.append(0.0)
+            L3_.append(0.0)
+            L2_.append(0.0)
+            L1_.append(0.0)
             Ax_.append(float(spectrum[13]))
-            H1_.append(float(spectrum[14]))
-            H2_.append(float(spectrum[15]))
-            H3_.append(float(spectrum[15]))
-            H4_.append(float(spectrum[15]))
+            H1_.append(0.0)
+            H2_.append(0.0)
+            H3_.append(0.0)
+            H4_.append(0.0)
      
             iE=iE_
             L5=L5_
