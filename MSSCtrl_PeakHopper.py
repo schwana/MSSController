@@ -1353,6 +1353,35 @@ class Controls(tk.Frame):
 
         print (max(Ax))
         print (min(Ax))
+
+        HalfPeakHeight=(max(Ax)-min(Ax))/2
+
+        #Loop beween Start IE and midIE to look for voltage
+        #where Ax is HalfPeakheight
+        TestVoltage=StartIE
+        i=0
+        while (TestVoltage<PeakToScan):
+
+            if (Ax[i]>HalfPeakHeight):
+                FWHM_Left=iE[i]
+                break
+            i=i+1
+            TestVoltage=TestVoltage+1
+
+        TestVoltage=StartIE
+        i=0
+        while (TestVoltage<EndIE):
+
+            if(TestVoltage>PeakToScan):
+
+                if (Ax[i]<HalfPeakHeight):
+                    FWHM_Right=iE[i]
+                    break
+            i=i+1
+            TestVoltage=TestVoltage+1
+            
+        print(FWHM_Left)
+        print(FWHM_Right)
         
         #Reset Arrays
         iE.clear()
