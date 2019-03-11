@@ -1352,6 +1352,7 @@ class Controls(tk.Frame):
         #Need iE and Ax for this.
 
         print (max(Ax))
+        print (min(Ax))
         
         #Reset Arrays
         iE.clear()
