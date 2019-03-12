@@ -219,6 +219,7 @@ class GraphFrame(tk.Frame):
     def RunScan(self):
 
         Controls.ScanPeak()
+        time.sleep(1)
         #Check that there is a valid IE range
         if (len(PTSItem)==0):
             tk.messagebox.showerror("Error", "No peaks to scan")
@@ -330,7 +331,7 @@ class GraphFrame(tk.Frame):
             s.send(str.encode(SVStr))
             time.sleep(0.1)
             IEreturn=(s.recv(1024))
-            time.sleep(0.1)
+            time.sleep(5)
 
            # time.sleep(30)
 
