@@ -218,6 +218,7 @@ class GraphFrame(tk.Frame):
                
     def RunScan(self):
 
+        Controls.ScanPeak()
         #Check that there is a valid IE range
         if (len(PTSItem)==0):
             tk.messagebox.showerror("Error", "No peaks to scan")
