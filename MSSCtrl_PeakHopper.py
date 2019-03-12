@@ -304,6 +304,7 @@ class GraphFrame(tk.Frame):
         EndPoint=N_PTS
 
         Offset=float(Controls.PTSOffset.get())
+        StartTime=time.time()
 
         
         
@@ -362,6 +363,9 @@ class GraphFrame(tk.Frame):
                 time.sleep((1*AquIntTimeInt*acqRestTime))
                 returnString=s.recv(4096)
                 time.sleep(0.1)
+
+                TimeNow=time.time()
+                TimeElapsed=TimeNow-StartTime
 
 ##                AcqStop=('StopAcq \r\n')
 ##                s.send(str.encode(AcqCommandToSend))
@@ -591,7 +595,8 @@ class GraphFrame(tk.Frame):
                 #Add the inidividual readings to the relevent array
                 #for data output and plotting
                 rS_.append(rS_String)
-                iE_.append(float(spectrum[0]))
+                #iE_.append(float(spectrum[0]))
+                iE_.append(TimeElapsed)
                 L5_.append(float(spectrum[8]))
                 L4_.append(float(spectrum[9]))
                 L3_.append(float(spectrum[10]))
