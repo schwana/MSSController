@@ -1467,10 +1467,10 @@ class Controls(tk.Frame):
 
         try:
             #Connect to instrument
-
+            
             s.connect(('localhost',1090))
             print (s.recv(1024).decode("utf-8"))
-
+            
         except socket.error as e:
             print ("Error: ",e)
             Controls.StatusUpdate("Offline")
