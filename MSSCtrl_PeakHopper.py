@@ -145,7 +145,8 @@ class GraphFrame(tk.Frame):
                 Controls.PTSInput.insert(1,splitString[0]) 
             i=i+1
 
-
+        Controls.PTSOffset.delete(0,tk.END)
+        Controls.PTSOffset.insert(1,"0") 
 ##        #Get Number Lines in ComboBox
 ##        PTS=(Controls.PTSInput.get())
 ##        print (len(PTSItem))
@@ -1378,6 +1379,12 @@ class Controls(tk.Frame):
             
         print(FWHM_Left)
         print(FWHM_Right)
+
+        PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
+
+        print (PeakCentre)
+
+        
         
         #Reset Arrays
         iE.clear()
@@ -1499,8 +1506,12 @@ class Controls(tk.Frame):
 
     #FRAME FOR PEAKS TO SCAN
     Peaksframe=tk.Frame(frame2)
-    Peakslbl = tk.Label(Peaksframe, text="Peaks to Scan",width=20)
+    Peakslbl = tk.Label(Peaksframe, text="Peaks to Scan",width=10)
     Peakslbl.pack(side=tk.LEFT)
+    Offsetlbl = tk.Label(Peaksframe, text="Offset:",width=8)
+    Offsetlbl.pack(side=tk.LEFT)
+    PTSOffset = tk.Entry(Peaksframe,width=8)
+    PTSOffset.pack(side="left",padx=2)
     Peaksframe.pack(side=tk.TOP, fill=tk.NONE)
     PTSFrame=tk.Frame(frame2)
     PTSInput = tk.Entry(PTSFrame,width=8)
