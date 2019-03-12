@@ -302,7 +302,9 @@ class GraphFrame(tk.Frame):
         StartPoint=0
         EndPoint=N_PTS
 
- 
+        Offset=float(Controls.PTSOffset.get())
+
+        
         
         while (StartPoint<EndPoint):
 
@@ -317,7 +319,9 @@ class GraphFrame(tk.Frame):
 
             print ("Item ",PTSItem[StartPoint])
 
-            SV=float(PTSItem[StartPoint])
+            SV=float(PTSItem[StartPoint])-Offset
+
+            print("Source Voltage:", SV)
 
             #Set the voltage
             SVStr=("SetSourceOutput IE,"+str(SV)+"\r\n")
@@ -344,7 +348,6 @@ class GraphFrame(tk.Frame):
             N_init=0
             
             while N_init < N_scans:
-                print (N_init)
                 
                 acqAStr=("SetAcqPeriod "+str(acqTime)+"\r\n")
                 s.send(str.encode(acqAStr))
@@ -724,7 +727,7 @@ class GraphFrame(tk.Frame):
         H4=H4_
 
         N=len(iE)
-        print (N,"N")
+        #print (N,"N")
         
         p=GraphFrame.plot()
 
@@ -1384,6 +1387,10 @@ class Controls(tk.Frame):
 
         print (PeakCentre)
 
+        Offset= PeakToScan-PeakCentre
+
+        Controls.PTSOffset.delete(0,tk.END)
+        Controls.PTSOffset.insert(1,str(Offset)) 
         
         
         #Reset Arrays
@@ -1455,9 +1462,6 @@ class Controls(tk.Frame):
         time.sleep(0.2)
 
         print (GFCM)        
-
-
-        
         s.close()
 
     def FilOff():
