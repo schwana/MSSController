@@ -89,13 +89,6 @@ while (IE<(EndIE+1)):
     IE=IE+1
 
     print(float(spectrum[13]))
-    
-
-
-
-
-
-
 
 #Calculate the peak centre
 #Need iE and Ax for this.
@@ -129,14 +122,29 @@ while (TestVoltage<EndIE):
     i=i+1
     TestVoltage=TestVoltage+1
     
-print(FWHM_Left)
-print(FWHM_Right)
+print("Left ",FWHM_Left)
+print("Right ",FWHM_Right)
 
 PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
 
-print (PeakCentre)
+print ("Centre ",PeakCentre)
 
-Offset= PeakToScan-PeakCentre
+#Get Hi and Low
+intCentre = int(PeakCentre)
+
+Lo = PeakCentre-15
+Hi = PeakCentre+15
+
+#Search iE to get the index of Hi and Lo
+
+iLo = Ax.index(Lo)
+iHi = Ax.index(Hi)
+
+print (iLo,iHi)
+
+
+#Output to file
+
 
 #Reset Arrays
 iE.clear()
