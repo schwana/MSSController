@@ -1,6 +1,53 @@
 import time
 import socket
 
+
+def outputData(self, iE,Ax):
+    print("Output Data to File")
+
+    os.chdir("c:\\MSSData")
+
+    file_to_open = "TuneNum.txt"
+
+    #Get current tune run number
+    fo = open(file_to_open, "r")
+    TuneNum = fo.readline()
+    fo.close()
+
+    print ("Tune Number",TuneNum)
+
+
+    FileName = 'Tune'+TuneNum+'.csv'
+
+    #Read Inlet Line
+    foInitial = open(FileName,"a")
+    foInitial.write("iE,Ax"+"\n")
+
+    foInitial.close()
+
+    foRun = open(FileName,"a")
+    #Collected data
+    for x in range (0, len(iE)):
+
+        outputString=(str(iE[x])+","+str(Ax[x]))
+        
+        foRun.write(outputString+'\n')
+
+    foRun.close()
+    
+    foUpdate = open("TuneNum.txt", "w")
+
+    print (type(TuneNum))
+    
+    S=int(float(TuneNum))
+    S=S+1
+    
+    foUpdate = open("TuneNum.txt", "w")
+    
+    foUpdate.write(str(S))
+
+    foUpdate.close()       
+
 iE_=[]
 Ax_=[]
 
@@ -112,10 +159,6 @@ while (IR<(EndIR+1)):
 
     HalfPeakHeight=(MaxSignal-MinSignal)/2
 
-
-    print (MinSignal)
-    print (MaxSignal)
-    print (HalfPeakHeight)
     if (HalfPeakHeight>0.01):
         #Loop beween Start IE and midIE to look for voltage
         #where Ax is HalfPeakheight
@@ -158,7 +201,7 @@ while (IR<(EndIR+1)):
 
         iLo = iE.index(Lo)
         iHi = iE.index(Hi)
-        iCr =iE.index(intCentre)
+        iCr = iE.index(intCentre)
 
         LowSig=Ax[iLo]
         HighSig=Ax[iHi]
@@ -171,13 +214,12 @@ while (IR<(EndIR+1)):
         HighSig=0
         Roundness=0
         PSF=0
-    print ("HighSig ",HighSig)
-    print ("Roundness ",Roundness)
-    print ("PSF ",PSF)
 
     #Output to file
-
-
+    #Open and append summary
+    print ("Filename,YF,YB,",IR,HighSig,PSF)
+    #Create and save scan
+    self.outputData(iE,Ax)
     #Reset Arrays
     iE.clear()
     Ax.clear()
