@@ -5,13 +5,12 @@ iE_=[]
 Ax_=[]
 
 
-
-print ("Peak Centering")
+print ("Peak Tune Up")
 PeakToScan=1390
 print (PeakToScan)
 
-StartIE=PeakToScan-40
-EndIE=PeakToScan+40
+StartIE=1300
+EndIE=1500
 
 #Connect to instrument
 print ("Connecting to mass spec")
@@ -51,6 +50,11 @@ time.sleep(0.1)
 IEreturn=(s.recv(1024))
 time.sleep(2)
 
+## Loop through IR, YB,YF and then scan
+
+
+
+
 while (IE<(EndIE+1)):
     
     SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
@@ -86,22 +90,26 @@ while (IE<(EndIE+1)):
 
     print(float(spectrum[13]))
     
-s.close()
+
+
+
+
+
 
 
 #Calculate the peak centre
 #Need iE and Ax for this.
 
-print (max(Ax))
-print (min(Ax))
+MaxSignal = (max(Ax))
+MinSignal = (min(Ax))
 
-HalfPeakHeight=(max(Ax)-min(Ax))/2
+HalfPeakHeight=(MaxSignal-MinSignal)/2
 
 #Loop beween Start IE and midIE to look for voltage
 #where Ax is HalfPeakheight
 TestVoltage=StartIE
 i=0
-while (TestVoltage<PeakToScan):
+while (TestVoltage<EndIE):
 
     if (Ax[i]>HalfPeakHeight):
         FWHM_Left=iE[i]
@@ -109,7 +117,7 @@ while (TestVoltage<PeakToScan):
     i=i+1
     TestVoltage=TestVoltage+1
 
-TestVoltage=StartIE
+TestVoltage=FWHM_Left+20
 i=0
 while (TestVoltage<EndIE):
 
@@ -133,3 +141,7 @@ Offset= PeakToScan-PeakCentre
 #Reset Arrays
 iE.clear()
 Ax.clear()
+
+
+
+s.close()
