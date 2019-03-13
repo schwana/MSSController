@@ -132,13 +132,13 @@ print ("Centre ",PeakCentre)
 #Get Hi and Low
 intCentre = int(PeakCentre)
 
-Lo = PeakCentre-15
-Hi = PeakCentre+15
+Lo = intCentre-15
+Hi = intCentre+15
 
 #Search iE to get the index of Hi and Lo
 
-iLo = Ax.index(Lo)
-iHi = Ax.index(Hi)
+iLo = iE.index(Lo)
+iHi = iE.index(Hi)
 
 print (iLo,iHi)
 
