@@ -207,12 +207,11 @@ while (YF<(EndYF+1)):
                     i=i+1
                     TestVoltage=TestVoltage+1
                     
-                print("Left ",FWHM_Left)
-                print("Right ",FWHM_Right)
+
 
                 PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
 
-                print ("Centre ",PeakCentre)
+
 
                 #Get Hi and Low
                 intCentre = int(PeakCentre)
@@ -240,7 +239,7 @@ while (YF<(EndYF+1)):
 
             #Output to file
             #Open and append summary
-            print ("Filename ",YF,YB,IR,HighSig,PSF)
+            print ("Filename ",YF,YB,IR,HighSig,PSF,PeakCentre)
             #Create and save scan
             #outputData(iE,Ax)
             #Reset Arrays
@@ -251,7 +250,7 @@ while (YF<(EndYF+1)):
 
         YB=YB+1
         
-    YF=YF=1
+    YF=YF+1
 
 
 
