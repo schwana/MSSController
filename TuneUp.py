@@ -58,12 +58,12 @@ time.sleep(0.2)
 print ("Version"+s.recv(1024).decode("utf-8"))
 
 #Set the aquisition period and rest time (based on single integration)
-acqTime=AqTime.get()
+
 acqAStr=("SetAcqPeriod 100 \r\n")
 s.send(str.encode(acqAStr))
 time.sleep(0.2)
 Dummy= ("SetAcqPeriod",s.recv(1024).decode("utf-8").replace('\n', ' ').replace('\r', ''))
-acqRestTime=0.1+(acqTime/1000)
+acqRestTime=0.2
 
 IE=StartIE
 SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
@@ -244,10 +244,6 @@ PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
 print (PeakCentre)
 
 Offset= PeakToScan-PeakCentre
-
-Controls.PTSOffset.delete(0,tk.END)
-Controls.PTSOffset.insert(1,str(Offset)) 
-
 
 #Reset Arrays
 iE.clear()
