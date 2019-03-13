@@ -3,51 +3,36 @@ import socket
 import os
 
 
-def outputData(iE,Ax):
-    print("Output Data to File")
-
+def outputData(iE,Ax,DataString):
     os.chdir("c:\\MSSData")
-
     file_to_open = "TuneNum.txt"
-
     #Get current tune run number
     fo = open(file_to_open, "r")
     TuneNum = fo.readline()
     fo.close()
-
-    print ("Tune Number",TuneNum)
-
-
     FileName = 'Tune'+TuneNum+'.csv'
-
-    #Read Inlet Line
     foInitial = open(FileName,"a")
     foInitial.write("iE,Ax"+"\n")
-
     foInitial.close()
 
     foRun = open(FileName,"a")
     #Collected data
     for x in range (0, len(iE)):
-
         outputString=(str(iE[x])+","+str(Ax[x]))
-        
         foRun.write(outputString+'\n')
-
     foRun.close()
     
     foUpdate = open("TuneNum.txt", "w")
-
-    print (type(TuneNum))
-    
     S=int(float(TuneNum))
     S=S+1
-    
     foUpdate = open("TuneNum.txt", "w")
-    
     foUpdate.write(str(S))
-
-    foUpdate.close()       
+    foUpdate.close()
+    #append dataline to summary file
+    foSummary = open("Summary.csv","a")
+    foSummary.write(int(float(TuneNum))+","+DataString+"\n")
+    foSummary.close()
+    
 
 iE_=[]
 Ax_=[]
@@ -240,8 +225,9 @@ while (YF<(EndYF+1)):
             #Output to file
             #Open and append summary
             print ("Filename ",YF,YB,IR,HighSig,PSF,PeakCentre)
+            DataString=(YF+","+YB+","+IR+","+HighSig+","+PSF+","+PeakCentre)
             #Create and save scan
-            #outputData(iE,Ax)
+            outputData(iE,Ax,DataString)
             #Reset Arrays
             iE.clear()
             Ax.clear()
