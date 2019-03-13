@@ -110,11 +110,11 @@ while (TestVoltage<EndIE):
     i=i+1
     TestVoltage=TestVoltage+1
 
-TestVoltage=FWHM_Left+20
+TestVoltage=StartIE
 i=0
 while (TestVoltage<EndIE):
 
-    if(TestVoltage>PeakToScan):
+    if(TestVoltage>(FWHM_Left+20)):
 
         if (Ax[i]<HalfPeakHeight):
             FWHM_Right=iE[i]
