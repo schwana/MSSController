@@ -240,7 +240,7 @@ while (YF<(EndYF+1)):
 
             #Output to file
             #Open and append summary
-            print ("Filename,YF,YB,",IR,HighSig,PSF)
+            print ("Filename ",YF,YB,IR,HighSig,PSF)
             #Create and save scan
             #outputData(iE,Ax)
             #Reset Arrays
