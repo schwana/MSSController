@@ -6,8 +6,6 @@ Ax_=[]
 
 
 print ("Peak Tune Up")
-PeakToScan=1390
-print (PeakToScan)
 
 StartIE=1300
 EndIE=1500
@@ -139,9 +137,19 @@ Hi = intCentre+15
 
 iLo = iE.index(Lo)
 iHi = iE.index(Hi)
+iCr =iE.index(intCentre)
 
-print (iLo,iHi)
+LowSig=Ax(iLo)
+HighSig=Ax(iHi)
+CentSig=Ax(iCr)
 
+Roundness = (CentSig - ((HighSig+LowSig)/2))/CentSig
+
+PSF = 1/Roundness
+
+print ("HighSig ",HighSig)
+print ("Roundness ",Roundness)
+print ("PSF ",PSF)
 
 #Output to file
 
