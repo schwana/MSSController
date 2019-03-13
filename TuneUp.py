@@ -1,6 +1,9 @@
 import time
 import socket
 
+iE_=[]
+Ax_=[]
+
 
 
 print ("Peak Centering")
@@ -64,7 +67,7 @@ while (IE<(EndIE+1)):
     time.sleep(0.1)
    #Separate the string
     spec=(returnString.decode("utf-8"))
-    rS=(str(SV_Peak+SV_BL)+","+spec)
+    rS=(str(IE)+","+spec)
     rS=rS[0:-5]
     spectrum=rS.split(',')
 
