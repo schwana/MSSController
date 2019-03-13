@@ -10,7 +10,7 @@ print ("Peak Tune Up")
 StartIE=1300
 EndIE=1500
 
-StartIR=5
+StartIR=-10
 EndIR=8
 
 #Connect to instrument
@@ -48,13 +48,16 @@ acqRestTime=0.2
 
 ## Loop through IR, YB,YF and then scan
 IR=StartIR
-IRStr=("SetSourceOutput IR,"+str(IR)+"\r\n")
-s.send(str.encode(IRStr))
-time.sleep(0.1)
-IRreturn=(s.recv(1024))
-time.sleep(2)
+
 
 while (IR<(EndIR+1)):
+
+    
+    IRStr=("SetSourceOutput IR,"+str(IR)+"\r\n")
+    s.send(str.encode(IRStr))
+    time.sleep(0.1)
+    IRreturn=(s.recv(1024))
+    time.sleep(1)
 
     IE=StartIE
     SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
@@ -96,7 +99,7 @@ while (IR<(EndIR+1)):
        
         IE=IE+1
 
-        print(float(spectrum[13]))
+       # print(float(spectrum[13]))
 
 
         
@@ -109,57 +112,65 @@ while (IR<(EndIR+1)):
 
     HalfPeakHeight=(MaxSignal-MinSignal)/2
 
-    #Loop beween Start IE and midIE to look for voltage
-    #where Ax is HalfPeakheight
-    TestVoltage=StartIE
-    i=0
-    while (TestVoltage<EndIE):
 
-        if (Ax[i]>HalfPeakHeight):
-            FWHM_Left=iE[i]
-            break
-        i=i+1
-        TestVoltage=TestVoltage+1
+    print (MinSignal)
+    print (MaxSignal)
+    print (HalfPeakHeight)
+    if (HalfPeakHeight>0.01):
+        #Loop beween Start IE and midIE to look for voltage
+        #where Ax is HalfPeakheight
+        TestVoltage=StartIE
+        i=0
+        while (TestVoltage<EndIE):
 
-    TestVoltage=StartIE
-    i=0
-    while (TestVoltage<EndIE):
-
-        if(TestVoltage>(FWHM_Left+20)):
-
-            if (Ax[i]<HalfPeakHeight):
-                FWHM_Right=iE[i]
+            if (Ax[i]>HalfPeakHeight):
+                FWHM_Left=iE[i]
                 break
-        i=i+1
-        TestVoltage=TestVoltage+1
-        
-    print("Left ",FWHM_Left)
-    print("Right ",FWHM_Right)
+            i=i+1
+            TestVoltage=TestVoltage+1
 
-    PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
+        TestVoltage=StartIE
+        i=0
+        while (TestVoltage<EndIE):
 
-    print ("Centre ",PeakCentre)
+            if(TestVoltage>(FWHM_Left+20)):
 
-    #Get Hi and Low
-    intCentre = int(PeakCentre)
+                if (Ax[i]<HalfPeakHeight):
+                    FWHM_Right=iE[i]
+                    break
+            i=i+1
+            TestVoltage=TestVoltage+1
+            
+        print("Left ",FWHM_Left)
+        print("Right ",FWHM_Right)
 
-    Lo = intCentre-15
-    Hi = intCentre+15
+        PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
 
-    #Search iE to get the index of Hi and Lo
+        print ("Centre ",PeakCentre)
 
-    iLo = iE.index(Lo)
-    iHi = iE.index(Hi)
-    iCr =iE.index(intCentre)
+        #Get Hi and Low
+        intCentre = int(PeakCentre)
 
-    LowSig=Ax[iLo]
-    HighSig=Ax[iHi]
-    CentSig=Ax[iCr]
+        Lo = intCentre-15
+        Hi = intCentre+15
 
-    Roundness = (CentSig - ((HighSig+LowSig)/2))/CentSig
+        #Search iE to get the index of Hi and Lo
 
-    PSF = 1/Roundness
+        iLo = iE.index(Lo)
+        iHi = iE.index(Hi)
+        iCr =iE.index(intCentre)
 
+        LowSig=Ax[iLo]
+        HighSig=Ax[iHi]
+        CentSig=Ax[iCr]
+
+        Roundness = (CentSig - ((HighSig+LowSig)/2))/CentSig
+
+        PSF = 1/Roundness
+    else:
+        HighSig=0
+        Roundness=0
+        PSF=0
     print ("HighSig ",HighSig)
     print ("Roundness ",Roundness)
     print ("PSF ",PSF)
