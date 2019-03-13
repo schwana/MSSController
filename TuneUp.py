@@ -1,8 +1,9 @@
 import time
 import socket
+import os
 
 
-def outputData(self, iE,Ax):
+def outputData(iE,Ax):
     print("Output Data to File")
 
     os.chdir("c:\\MSSData")
@@ -219,7 +220,7 @@ while (IR<(EndIR+1)):
     #Open and append summary
     print ("Filename,YF,YB,",IR,HighSig,PSF)
     #Create and save scan
-    self.outputData(iE,Ax)
+    outputData(iE,Ax)
     #Reset Arrays
     iE.clear()
     Ax.clear()
