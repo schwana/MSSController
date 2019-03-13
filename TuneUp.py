@@ -139,9 +139,9 @@ iLo = iE.index(Lo)
 iHi = iE.index(Hi)
 iCr =iE.index(intCentre)
 
-LowSig=Ax(iLo)
-HighSig=Ax(iHi)
-CentSig=Ax(iCr)
+LowSig=Ax[iLo]
+HighSig=Ax[iHi]
+CentSig=Ax[iCr]
 
 Roundness = (CentSig - ((HighSig+LowSig)/2))/CentSig
 
