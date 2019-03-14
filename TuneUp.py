@@ -1,6 +1,7 @@
 import time
 import socket
 import os
+from datetime import datetime
 
 
 def outputData(iE,Ax,DataString):
@@ -30,7 +31,7 @@ def outputData(iE,Ax,DataString):
     foUpdate.close()
     #append dataline to summary file
     foSummary = open("Summary.csv","a")
-    foSummary.write(int(float(TuneNum))+","+DataString+"\n")
+    foSummary.write('\n'+str((TuneNum))+","+DataString)
     foSummary.close()
     
 
@@ -43,14 +44,16 @@ print ("Peak Tune Up")
 StartIE=1300
 EndIE=1500
 
-StartIR=7
-EndIR=8
+StartIR=-5
+EndIR=15
 
-StartYB=6
-EndYB=7
+StartYB=-15
+EndYB=20
 
-StartYF=69
-EndYF=70
+StartYF=50
+EndYF=90
+
+Shoulders=10
 
 #Connect to instrument
 print ("Connecting to mass spec")
@@ -167,7 +170,9 @@ while (YF<(EndYF+1)):
 
             HalfPeakHeight=(MaxSignal-MinSignal)/2
 
-            if (HalfPeakHeight>0.01):
+            PeakCentre=0
+
+            if (HalfPeakHeight>0.05):
                 #Loop beween Start IE and midIE to look for voltage
                 #where Ax is HalfPeakheight
                 TestVoltage=StartIE
@@ -201,8 +206,8 @@ while (YF<(EndYF+1)):
                 #Get Hi and Low
                 intCentre = int(PeakCentre)
 
-                Lo = intCentre-15
-                Hi = intCentre+15
+                Lo = intCentre-Shoulders
+                Hi = intCentre+Shoulders
 
                 #Search iE to get the index of Hi and Lo
 
@@ -222,10 +227,12 @@ while (YF<(EndYF+1)):
                 Roundness=0
                 PSF=0
 
+            CurTime=str(datetime.now())
+
             #Output to file
             #Open and append summary
-            print ("Filename ",YF,YB,IR,HighSig,PSF,PeakCentre)
-            DataString=(YF+","+YB+","+IR+","+HighSig+","+PSF+","+PeakCentre)
+            print ("Filename ",CurTime,YF,YB,IR,HighSig,PSF,PeakCentre)
+            DataString=(CurTime+","+str(YF)+","+str(YB)+","+str(IR)+","+str(HighSig)+","+str(PSF)+","+str(PeakCentre))
             #Create and save scan
             outputData(iE,Ax,DataString)
             #Reset Arrays
