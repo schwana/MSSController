@@ -51,7 +51,7 @@ StartYB=-15
 EndYB=20
 
 StartYF=50
-EndYF=90
+EndYF=51
 
 Shoulders=10
 
@@ -135,7 +135,7 @@ while (YF<(EndYF+1)):
                 #Acquire Data - wait for enough time for the buffer to fill....
                 
                 s.send(b'StartAcq 1,JS\r\n')
-                time.sleep((acqRestTime))
+                time.sleep((0.3))
                 returnString=s.recv(1024)
                 time.sleep(0.1)
                #Separate the string
@@ -243,7 +243,7 @@ while (YF<(EndYF+1)):
 
         YB=YB+1
         
-    YF=YF+1
+    YF=YF+5
 
 
 
