@@ -33,6 +33,148 @@ def outputData(iE,Ax,DataString):
     foSummary = open("Summary.csv","a")
     foSummary.write('\n'+str((TuneNum))+","+DataString)
     foSummary.close()
+
+def Standard():
+    #Do a standard settings run
+    print("Running Standard")
+
+    
+    YFStr=("SetSourceOutput YF, 70 \r\n")
+    s.send(str.encode(YFStr))
+    time.sleep(0.1)
+    YFreturn=(s.recv(1024))
+    time.sleep(1)
+
+    YBStr=("SetSourceOutput YB, 1.4 \r\n")
+    s.send(str.encode(YBStr))
+    time.sleep(0.1)
+    YBreturn=(s.recv(1024))
+    time.sleep(1)
+
+    IRStr=("SetSourceOutput IR, 6.1 \r\n")
+    s.send(str.encode(IRStr))
+    time.sleep(0.1)
+    IRreturn=(s.recv(1024))
+    time.sleep(1)
+
+            IE=StartIE
+            SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
+            s.send(str.encode(SVStr))
+            time.sleep(0.1)
+            IEreturn=(s.recv(1024))
+            time.sleep(2)
+
+            while (IE<(EndIE+1)):
+                
+                SVStr=("SetSourceOutput IE,"+str(IE)+"\r\n")
+                s.send(str.encode(SVStr))
+                time.sleep(0.1)
+                IEreturn=(s.recv(1024))
+                time.sleep(0.1)
+
+                #Acquire Data - wait for enough time for the buffer to fill....
+                
+                s.send(b'StartAcq 1,JS\r\n')
+                time.sleep((0.3))
+                returnString=s.recv(1024)
+                time.sleep(0.1)
+               #Separate the string
+                spec=(returnString.decode("utf-8"))
+                rS=(str(IE)+","+spec)
+                rS=rS[0:-5]
+                spectrum=rS.split(',')
+
+                #print (spectrum)
+                #Add the inidividual readings to the relevent array
+                #for data output and plotting
+                
+                iE_.append(float(spectrum[0]))
+                Ax_.append(float(spectrum[13]))
+
+                iE=iE_
+                Ax=Ax_
+                N=len(iE)
+               
+                IE=IE+1
+
+               # print(float(spectrum[13]))
+
+            #Calculate the peak centre
+            #Need iE and Ax for this.
+
+            MaxSignal = (max(Ax))
+            MinSignal = (min(Ax))
+
+            HalfPeakHeight=(MaxSignal-MinSignal)/2
+
+            PeakCentre=0
+
+            if (HalfPeakHeight>0.05):
+                #Loop beween Start IE and midIE to look for voltage
+                #where Ax is HalfPeakheight
+                TestVoltage=StartIE
+                i=0
+                while (TestVoltage<EndIE):
+
+                    if (Ax[i]>HalfPeakHeight):
+                        FWHM_Left=iE[i]
+                        break
+                    i=i+1
+                    TestVoltage=TestVoltage+1
+
+                TestVoltage=StartIE
+                i=0
+                while (TestVoltage<EndIE):
+
+                    if(TestVoltage>(FWHM_Left+20)):
+
+                        if (Ax[i]<HalfPeakHeight):
+                            FWHM_Right=iE[i]
+                            break
+                    i=i+1
+                    TestVoltage=TestVoltage+1
+                    
+
+
+                PeakCentre=((FWHM_Right-FWHM_Left)/2)+FWHM_Left
+
+
+
+                #Get Hi and Low
+                intCentre = int(PeakCentre)
+
+                Lo = intCentre-Shoulders
+                Hi = intCentre+Shoulders
+
+                #Search iE to get the index of Hi and Lo
+
+                iLo = iE.index(Lo)
+                iHi = iE.index(Hi)
+                iCr = iE.index(intCentre)
+
+                LowSig=Ax[iLo]
+                HighSig=Ax[iHi]
+                CentSig=Ax[iCr]
+
+                Roundness = (CentSig - ((HighSig+LowSig)/2))/CentSig
+
+                PSF = 1/Roundness
+            else:
+                HighSig=0
+                Roundness=0
+                PSF=0
+
+            CurTime=str(datetime.now())
+
+            #Output to file
+            #Open and append summary
+            print ("Filename ",CurTime,YF,YB,IR,HighSig,PSF,PeakCentre)
+            DataString=(CurTime+","+str(YF)+","+str(YB)+","+str(IR)+","+str(HighSig)+","+str(PSF)+","+str(PeakCentre))
+            #Create and save scan
+            outputData(iE,Ax,DataString)
+            #Reset Arrays
+            iE.clear()
+            Ax.clear()
     
 
 iE_=[]
@@ -51,7 +193,7 @@ StartYB=-15
 EndYB=20
 
 StartYF=50
-EndYF=51
+EndYF=55
 
 Shoulders=10
 
@@ -91,7 +233,7 @@ acqRestTime=0.2
 ## Loop through IR, YB,YF and then scan
 
 YF=StartYF
-while (YF<(EndYF+1)):
+while (YF<(EndYF+5)):
     YFStr=("SetSourceOutput YF,"+str(YF)+"\r\n")
     s.send(str.encode(YFStr))
     time.sleep(0.1)
@@ -101,11 +243,21 @@ while (YF<(EndYF+1)):
     YB=StartYB
     while (YB<(EndYB+1)):
 
+        Standard()
+
+        YFStr=("SetSourceOutput YF,"+str(YF)+"\r\n")
+        s.send(str.encode(YFStr))
+        time.sleep(0.1)
+        YFreturn=(s.recv(1024))
+        time.sleep(1)
+
         YBStr=("SetSourceOutput YB,"+str(YB)+"\r\n")
         s.send(str.encode(YBStr))
         time.sleep(0.1)
         YBreturn=(s.recv(1024))
         time.sleep(1)
+
+        
 
         IR=StartIR
         while (IR<(EndIR+1)):
@@ -156,9 +308,6 @@ while (YF<(EndYF+1)):
                 N=len(iE)
                
                 IE=IE+1
-
-               # print(float(spectrum[13]))
-
 
                 
 
@@ -245,7 +394,7 @@ while (YF<(EndYF+1)):
         
     YF=YF+5
 
-
+Standard()
 
 
 s.close()
