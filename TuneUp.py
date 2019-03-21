@@ -194,8 +194,8 @@ EndIR=15
 StartYB=-15
 EndYB=20
 
-StartYF=60
-EndYF=64
+StartYF=80
+EndYF=80
 
 Shoulders=10
 
