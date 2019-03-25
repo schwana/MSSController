@@ -188,14 +188,14 @@ print ("Peak Tune Up")
 StartIE=1300
 EndIE=1500
 
-StartIR=-5
-EndIR=15
+StartIR=2
+EndIR=10
 
-StartYB=-15
-EndYB=20
+StartYB=8
+EndYB=16
 
-StartYF=80
-EndYF=80
+StartYF=65
+EndYF=75
 
 Shoulders=10
 
@@ -394,7 +394,7 @@ while (YF<(EndYF+5)):
 
         YB=YB+1
         
-    YF=YF+5
+    YF=YF+1
 
 Standard()
 
