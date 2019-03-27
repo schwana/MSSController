@@ -235,7 +235,7 @@ acqRestTime=0.2
 ## Loop through IR, YB,YF and then scan
 
 YF=StartYF
-while (YF<(EndYF+5)):
+while (YF<(EndYF+1)):
     YFStr=("SetSourceOutput YF,"+str(YF)+"\r\n")
     s.send(str.encode(YFStr))
     time.sleep(0.1)
