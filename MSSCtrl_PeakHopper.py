@@ -331,9 +331,9 @@ class GraphFrame(tk.Frame):
             s.send(str.encode(SVStr))
             time.sleep(0.1)
             IEreturn=(s.recv(1024))
-            time.sleep(5)
+            #time.sleep(5)
 
-           # time.sleep(30)
+            time.sleep(30)
 
             #Load the current settings into float values
             #to populate the fast scan arrays
@@ -347,7 +347,7 @@ class GraphFrame(tk.Frame):
 
             #Do N scans
 
-            N_scans=60
+            N_scans=10
             N_init=0
             
             while N_init < N_scans:
