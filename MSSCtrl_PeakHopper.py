@@ -27,7 +27,9 @@ toolbar = NavigationToolbar2Tk(canvas, frame1)
 toolbar.update()
 frame1.pack(side=tk.LEFT, fill=tk.X)
 canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.X)
-frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
+#frame2=tk.Frame(root, width=400, height=400, colormap="new", borderwidth=10)
+frame2=tk.Frame(root, width=400, height=400, borderwidth=10)
+
 frame2.pack(side=tk.RIGHT, fill=tk.X)
 
 
