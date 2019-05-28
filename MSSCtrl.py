@@ -51,9 +51,11 @@ class GraphFrame(tk.Frame):
         tk.Frame.__init__(self, master)   
         self.master = master
         self.init_window()
+        #Read the Mass Spec and update the "Read" column
+        Controls.ReadMassSpec()
         
     def init_window(self):
-        
+        #Initialise the window - add menus
         self.master.title("Python Mass Spectrometer Controller")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.NONE)
@@ -142,10 +144,6 @@ class GraphFrame(tk.Frame):
         ieStepSize.set(0.2)
 
         menu.add_cascade(label="Settings", menu=settings)
-
-        #Read the Mass Spec and update the "Read" column
-        Controls.ReadMassSpec()
-
            
     def exit(self):
         exit()
